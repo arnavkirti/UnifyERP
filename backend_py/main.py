@@ -8,6 +8,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.chains.question_answering import load_qa_chain
 import os
+import re
 import json
 
 app = FastAPI()
@@ -36,9 +37,9 @@ except Exception as e:
     raise RuntimeError(f"Failed to load vector store: {str(e)}")
 
 # Prompt Template
-template = """You are a smart invoice data mapper.
+template = """You are a smart payment terms data mapper.
 Given a JSON response from {source} system and the schema doc below,
-convert the input into the standard invoice format. Respond with ONLY the JSON.
+convert the input into the standard payment terms format. Respond with ONLY valid JSON, no explanations, markdown, or formatting.
 
 Schema Doc:
 {context}
@@ -46,7 +47,7 @@ Schema Doc:
 Input JSON:
 {input_json}
 
-Mapped JSON:
+Mapped JSON (Only valid JSON below, no extra text):
 """
 
 
@@ -141,14 +142,23 @@ async def map_payment_terms(payment_terms_data: PaymentTermsData):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 def extract_json_from_response(text: str) -> dict:
-    """Helper to extract JSON in case LLM adds extra words or formatting."""
-    try:
-        start = text.find('{')
-        end = text.rfind('}') + 1
-        if start != -1 and end > start:
-            return json.loads(text[start:end])
-        raise ValueError("No JSON found in response.")
-    except Exception as e:
-        raise ValueError(f"Failed to extract JSON from response: {str(e)}")
+    """Extract the first valid JSON object from text using bracket counting."""
+    start = text.find('{')
+    if start == -1:
+        raise ValueError("No opening brace found.")
+
+    bracket_count = 0
+    for i in range(start, len(text)):
+        if text[i] == '{':
+            bracket_count += 1
+        elif text[i] == '}':
+            bracket_count -= 1
+            if bracket_count == 0:
+                try:
+                    json_str = text[start:i + 1]
+                    return json.loads(json_str)
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Failed to parse JSON: {str(e)}")
+
+    raise ValueError("No complete JSON object found.")
