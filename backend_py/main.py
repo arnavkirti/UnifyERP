@@ -14,12 +14,24 @@ app = FastAPI()
 load_dotenv()
 
 try:
-    vector_db = FAISS.load_local(
+    # Load invoice schema vector store
+    invoice_vector_db = FAISS.load_local(
         "../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema",
         GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
-        allow_dangerous_deserialization=True  # Only if you trust the source
+        allow_dangerous_deserialization=True
     )
-    retriever = vector_db.as_retriever()
+    
+    # Load payment terms schema vector store
+    payment_terms_vector_db = FAISS.load_local(
+        "../backend/ERP/Universal_schema/schemas/vectorstore/payment_schema",
+        GoogleGenerativeAIEmbeddings(model="models/embedding-001"),
+        allow_dangerous_deserialization=True
+    )
+    
+    # Create separate retrievers
+    invoice_retriever = invoice_vector_db.as_retriever()
+    payment_terms_retriever = payment_terms_vector_db.as_retriever()
+
 except Exception as e:
     raise RuntimeError(f"Failed to load vector store: {str(e)}")
 
@@ -81,7 +93,7 @@ async def map_invoice(invoice_data: InvoiceData):
         input_json = json.dumps(invoice_data.data, indent=2)
 
         # 🔍 Fetch relevant schema documentation from the vector DB
-        docs = retriever.get_relevant_documents("invoice schema")
+        docs = invoice_retrieverretriever.get_relevant_documents("invoice schema")
         context = "\n\n".join([doc.page_content for doc in docs])
 
         # 🧠 Run the LLM chain with the populated prompt
@@ -109,7 +121,7 @@ async def map_payment_terms(payment_terms_data: PaymentTermsData):
         input_json = json.dumps(payment_terms_data.data, indent=2)
 
         # Retrieve relevant universal schema context from vector DB
-        docs = retriever.get_relevant_documents("payment terms schema")
+        docs = payment_terms_retriever.get_relevant_documents("payment terms schema")
         context = "\n\n".join([doc.page_content for doc in docs])
 
         # Run the chain to map the data
