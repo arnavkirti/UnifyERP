@@ -1,0 +1,7 @@
+payment_term_code: string — Code that identifies the payment term
+description: string — A human-readable explanation of the payment term
+net_days: integer — Number of days after which payment is due
+discount_days: integer — Number of days for early payment discount (optional)
+discount_percent: float — Discount percentage offered for early payment (optional)
+fixed_day: integer — Specific day of the month when payment is due (optional)
+monthly_terms: string — Any special monthly terms (optional)

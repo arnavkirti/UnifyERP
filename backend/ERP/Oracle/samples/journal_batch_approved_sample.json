@@ -1,0 +1,12 @@
+{
+    "BusinessEventCode": "JournalBatchApproved",
+    "BusinessEventIdentifier": "Journal_Batch_Approved",
+    "CreatedBy": "SEED_DATA_FROM_APPLICATION",
+    "CreationDate": "2019-07-28T18:19:19.261+00:00",
+    "EnabledFlag": true,
+    "LastUpdateDate": "2020-08-21T09:25:40+00:00",
+    "LastUpdateLogin": "AAF07631468304A4E0538C96F40A10A1",
+    "LastUpdatedBy": "FINUSER1",
+    "ErpBusinessEventId": 100100120766717
+  }
+  

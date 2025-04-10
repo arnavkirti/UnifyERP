@@ -54,10 +54,55 @@
 }
  ```
 2. "SAP" invoices `/invoices`
- - no request body
- - response:
- / attached in SAP_Invoices.png
-
+{
+  "invoice": {
+    "header": {
+      "invoice_number": "INV-12345",
+      "date": "2023-11-15",
+      "due_date": "2023-12-15",
+      "vendor": {
+        "name": "Vendor Name",
+        "address": "Vendor Address",
+        "tax_id": "TAX123456789"
+      },
+      "customer": {
+        "name": "Customer Name",
+        "address": "Customer Address",
+        "purchase_order": "PO-67890"
+      }
+    },
+    "items": [
+      {
+        "item_number": "001",
+        "description": "Product/Service Description",
+        "quantity": 1,
+        "unit_price": 100.00,
+        "tax_rate": 18.00,
+        "amount": 118.00
+      }
+    ],
+    "totals": {
+      "subtotal": 100.00,
+      "tax": 18.00,
+      "total": 118.00,
+      "currency": "INR"
+    },
+    "payment": {
+      "bank_details": {
+        "account_name": "Vendor Account Name",
+        "account_number": "1234567890",
+        "bank_name": "Bank Name",
+        "ifsc_code": "IFSC1234567"
+      }
+    },
+    "sap_data": {
+      "document_type": "R1",
+      "company_code": "1000",
+      "fiscal_year": "2023",
+      "posting_date": "2023-11-15"
+    }
+  }
+}
 ---
 
 1. "Oracle" Get all payment terms headers `/fscmRestApi/resources/11.13.18.05/payablesPaymentTerms`
@@ -118,10 +163,59 @@
  ```
 
 2. "SAP" payment terms `/payment-terms`
- - no request body
- - response:
- / attached in SAP_PaymentTerms.png
-
+{
+  "payment_terms": [
+    {
+      "payment_term_code": "0001",
+      "description": "Immediate Payment",
+      "net_days": 0,
+      "discount_days": 0,
+      "discount_percent": 0.0,
+      "fixed_day": null,
+      "monthly_terms": false
+    },
+    {
+      "payment_term_code": "0002",
+      "description": "Net 15 Days",
+      "net_days": 15,
+      "discount_days": 10,
+      "discount_percent": 2.0,
+      "fixed_day": null,
+      "monthly_terms": false
+    },
+    {
+      "payment_term_code": "0003",
+      "description": "Net 30 Days",
+      "net_days": 30,
+      "discount_days": 15,
+      "discount_percent": 2.0,
+      "fixed_day": null,
+      "monthly_terms": false
+    },
+    {
+      "payment_term_code": "0004",
+      "description": "End of Month",
+      "net_days": null,
+      "discount_days": null,
+      "discount_percent": null,
+      "fixed_day": 31,
+      "monthly_terms": true
+    }
+  ],
+  "count": 4,
+  "links": [
+    {
+      "rel": "self",
+      "href": "/api/v1/payment-terms",
+      "method": "GET"
+    },
+    {
+      "rel": "create",
+      "href": "/api/v1/payment-terms",
+      "method": "POST"
+    }
+  ]
+}
 ---
 
 1. "Oracle" Get job details `/fscmRestApi/resources/11.13.18.05/erpintegrations/{OperationName}`
@@ -184,6 +278,87 @@
 ```
 
 2. "SAP" `/bulk/jobs`
- - no req body
- - example response:
- / attached in SAP_Jobs.png
+ {
+  "jobs": [
+    {
+      "job_id": "JOB_12345",
+      "name": "INVOICE_PROCESSING",
+      "description": "Monthly invoice batch processing",
+      "status": "COMPLETED",
+      "start_time": "2023-11-15T08:00:00Z",
+      "end_time": "2023-11-15T08:15:30Z",
+      "created_by": "SYSTEM_ADMIN",
+      "priority": "MEDIUM",
+      "type": "BATCH",
+      "parameters": {
+        "accounting_period": "2023-11",
+        "company_code": "1000"
+      },
+      "results": {
+        "processed_records": 1250,
+        "successful": 1245,
+        "failed": 5,
+        "error_log": "/logs/JOB_12345_errors.log"
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "/api/v1/jobs/JOB_12345",
+          "method": "GET"
+        },
+        {
+          "rel": "logs",
+          "href": "/api/v1/jobs/JOB_12345/logs",
+          "method": "GET"
+        }
+      ]
+    },
+    {
+      "job_id": "JOB_67890",
+      "name": "PAYMENT_RUN",
+      "description": "Vendor payment processing",
+      "status": "RUNNING",
+      "start_time": "2023-11-15T09:00:00Z",
+      "end_time": null,
+      "created_by": "FINANCE_USER",
+      "priority": "HIGH",
+      "type": "ONLINE",
+      "parameters": {
+        "payment_date": "2023-11-16",
+        "payment_method": "BANK_TRANSFER"
+      },
+      "results": {
+        "processed_records": 350,
+        "successful": 350,
+        "failed": 0,
+        "error_log": null
+      },
+      "links": [
+        {
+          "rel": "self",
+          "href": "/api/v1/jobs/JOB_67890",
+          "method": "GET"
+        },
+        {
+          "rel": "cancel",
+          "href": "/api/v1/jobs/JOB_67890",
+          "method": "DELETE"
+        }
+      ]
+    }
+  ],
+  "count": 2,
+  "has_more": false,
+  "links": [
+    {
+      "rel": "self",
+      "href": "/api/v1/jobs",
+      "method": "GET"
+    },
+    {
+      "rel": "create",
+      "href": "/api/v1/jobs",
+      "method": "POST"
+    }
+  ]
+}
