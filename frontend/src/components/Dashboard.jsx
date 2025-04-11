@@ -167,7 +167,6 @@ export default function Dashboard({ onLogout, user }) {
 
         {/* Dashboard Content */}
         <div className="p-6 w-full">
-          {/* Rest of your dashboard content remains unchanged */}
           <div className="flex items-center justify-between mb-6 w-full">
             <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
             <div className="flex items-center gap-2">
@@ -182,8 +181,110 @@ export default function Dashboard({ onLogout, user }) {
             </div>
           </div>
 
-          {/* Stats Cards and other content remain the same */}
-          {/* ... */}
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-gray-600 text-sm font-medium">Total Revenue</h3>
+                <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">+12.5%</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <DollarSign className="h-8 w-8 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">$24,560</p>
+                  <p className="text-sm text-gray-500">+2.5k this week</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-gray-600 text-sm font-medium">Total Orders</h3>
+                <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">+8.2%</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <Package className="h-8 w-8 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">1,240</p>
+                  <p className="text-sm text-gray-500">+180 this week</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-gray-600 text-sm font-medium">Total Customers</h3>
+                <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">-3.1%</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <Users className="h-8 w-8 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">3,120</p>
+                  <p className="text-sm text-gray-500">-32 this week</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-gray-600 text-sm font-medium">Pending Invoices</h3>
+                <span className="bg-yellow-100 text-yellow-600 text-xs px-2 py-1 rounded-full">Pending</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <FileText className="h-8 w-8 text-orange-600" />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">15</p>
+                  <p className="text-sm text-gray-500">Need attention</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h2>
+            <div className="space-y-4">
+              {[
+                {
+                  title: "New order received",
+                  amount: "$1,200.00",
+                  time: "2 hours ago",
+                  status: "success"
+                },
+                {
+                  title: "Payment processed",
+                  amount: "$850.00",
+                  time: "5 hours ago",
+                  status: "success"
+                },
+                {
+                  title: "Invoice declined",
+                  amount: "$320.00",
+                  time: "1 day ago",
+                  status: "error"
+                }
+              ].map((activity, index) => (
+                <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
+                  <div className="flex items-center gap-3">
+                    {activity.status === "success" ? (
+                      <ArrowUpRight className="h-4 w-4 text-green-500" />
+                    ) : (
+                      <ArrowDownRight className="h-4 w-4 text-red-500" />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                      <p className="text-xs text-gray-500">{activity.time}</p>
+                    </div>
+                  </div>
+                  <span className={`text-sm font-medium ${
+                    activity.status === "success" ? "text-green-600" : "text-red-600"
+                  }`}>
+                    {activity.amount}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
