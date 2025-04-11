@@ -78,17 +78,23 @@ function App() {
                   Integrate, automate, and grow with confidence.
                 </p>
                 <div className="mt-8 flex flex-wrap gap-4">
-                  <button className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-orange-600 shadow-sm hover:bg-orange-50">
+                  <button 
+                    onClick={() => setShowSignupModal(true)}
+                    className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-orange-600 shadow-sm hover:bg-orange-50"
+                  >
                     Get Started
                   </button>
-                  <button className="rounded-md border border-white bg-transparent px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/10">
+                  <a 
+                    href="#features"
+                    className="rounded-md border border-white bg-white px-5 py-2.5 text-sm font-semibold text-white hover:bg-grey/10 inline-flex items-center"
+                  >
                     Learn More
-                  </button>
+                  </a>
                 </div>
               </div>
               <div className="hidden lg:block">
                 <img 
-                  src="/dashboard-preview.png" 
+                  src="src/assets/dashboard.png" 
                   alt="Dashboard Preview" 
                   className="rounded-lg shadow-xl"
                 />
@@ -156,27 +162,27 @@ function App() {
                 {
                   name: "Arnav Kirti",
                   role: "Team Lead",
-                  image: "/team/member1.jpg"
+                  image: "src/assets/mem-1.png"
                 },
                 {
                   name: "Harshit Kumar",
                   role: "Frontend Developer",
-                  image: "/team/member2.jpg"
+                  image: "src/assets/mem-2.png"
                 },
                 {
                   name: "Nitin Nigam",
                   role: "Backend Developer",
-                  image: "/team/member3.jpg"
+                  image: "src/assets/mem-2.png"
                 },
                 {
                   name: "Ishit Kalra",
                   role: "UI/UX Designer",
-                  image: "/team/member4.jpg"
+                  image: "src/assets/mem-2.png"
                 },
                 {
                   name: "Aviral Singh",
                   role: "DevOps Engineer",
-                  image: "/team/member5.jpg"
+                  image: "src/assets/mem-2.png"
                 }
               ].map((member, index) => (
                 <div key={index} className="text-center">
@@ -216,14 +222,14 @@ function App() {
                 <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input
                   type="email"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Password</label>
                 <input
                   type="password"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
                 />
               </div>
               <button
@@ -253,21 +259,21 @@ function App() {
                 <label className="block text-sm font-medium text-gray-700">Name</label>
                 <input
                   type="text"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input
                   type="email"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Password</label>
                 <input
                   type="password"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
                 />
               </div>
               <button
