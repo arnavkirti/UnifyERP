@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   ChevronRight,
   Code,
@@ -12,20 +12,45 @@ import {
   UserPlus
 } from "lucide-react"
 import Dashboard from "./components/Dashboard"
+import { authService } from "./services/authService"
 
 function App() {
-  const [showLoginModal, setShowLoginModal] = useState(false)
-  const [showSignupModal, setShowSignupModal] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [user, setUser] = useState(null)
 
-  const handleLogin = (e) => {
-    e.preventDefault()
-    setShowLoginModal(false)
-    setIsLoggedIn(true)
+  useEffect(() => {
+    const checkAuth = async () => {
+      const authenticated = await authService.isAuthenticated();
+      if (authenticated) {
+        const userInfo = await authService.getUserInfo();
+        setUser(userInfo);
+      }
+      setIsLoggedIn(authenticated);
+      setIsLoading(false);
+    };
+    
+    checkAuth();
+  }, []);
+
+  const handleLogin = () => {
+    authService.login();
+  }
+
+  const handleLogout = async () => {
+    const success = await authService.logout();
+    if (success) {
+      setIsLoggedIn(false);
+      setUser(null);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
   if (isLoggedIn) {
-    return <Dashboard />
+    return <Dashboard onLogout={handleLogout} user={user} />;
   }
 
   return (
@@ -46,23 +71,17 @@ function App() {
           </nav>
           <div className="flex items-center gap-3">
             <button 
-              onClick={() => setShowLoginModal(true)}
-              className="flex items-center gap-2 text-sm font-medium text-white"
-            >
-              <LogIn className="h-4 w-4" />
-              Login
-            </button>
-            <button 
-              onClick={() => setShowSignupModal(true)}
+              onClick={handleLogin}
               className="flex items-center gap-2 rounded-md bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 transition-colors"
             >
-              <UserPlus className="h-4 w-4" />
-              Sign Up
+              <LogIn className="h-4 w-4" />
+              Login with OAuth
             </button>
           </div>
         </div>
       </header>
 
+      {/* Rest of your landing page content remains the same */}
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-b from-orange-600 to-orange-700 py-20">
@@ -79,7 +98,7 @@ function App() {
                 </p>
                 <div className="mt-8 flex flex-wrap gap-4">
                   <button 
-                    onClick={() => setShowSignupModal(true)}
+                    onClick={handleLogin}
                     className="rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-orange-600 shadow-sm hover:bg-orange-50"
                   >
                     Get Started
@@ -211,87 +230,6 @@ function App() {
           </div>
         </div>
       </footer>
-
-      {/* Login Modal */}
-      {showLoginModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Login</h2>
-            <form className="space-y-4" onSubmit={handleLogin}>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input
-                  type="password"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full rounded-md bg-orange-600 px-4 py-2 text-white hover:bg-orange-700"
-              >
-                Login
-              </button>
-            </form>
-            <button
-              onClick={() => setShowLoginModal(false)}
-              className="mt-4 text-sm text-gray-600 hover:text-gray-900"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Signup Modal */}
-      {showSignupModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input
-                  type="password"
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full rounded-md bg-orange-600 px-4 py-2 text-white hover:bg-orange-700"
-              >
-                Sign Up
-              </button>
-            </form>
-            <button
-              onClick={() => setShowSignupModal(false)}
-              className="mt-4 text-sm text-gray-600 hover:text-gray-900"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

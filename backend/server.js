@@ -1,75 +1,134 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const passport = require('passport');
-const OAuth2Strategy = require('passport-oauth2').Strategy;
 const session = require('express-session');
-// const dataMapRouter = require('./routes/data_map');
+const cors = require('cors');
+const { google } = require('googleapis');
+const crypto = require('crypto');
 require('dotenv').config();
 
 const app = express();
 
 // Connect to MongoDB
-mongoose.connect( process.env.MONGODB_URI , {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+mongoose.connect(process.env.MONGODB_URI);
+
+// Create OAuth2 client with proper configuration
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URL
+);
+
+// Update scopes to include email
+const scopes = [
+  'https://www.googleapis.com/auth/userinfo.profile',
+  'https://www.googleapis.com/auth/userinfo.email'
+];
+
+// CORS configuration
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
 // Middleware
 app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+  }
 }));
 
-// Initialize Passport
-app.use(passport.initialize());
-app.use(passport.session());
+// Auth routes
+app.get('/auth/google', (req, res) => {
+  const state = crypto.randomBytes(32).toString('hex');
+  req.session.state = state;
 
-// Configure OAuth2 strategy
-passport.use(new OAuth2Strategy({
-    authorizationURL: process.env.OAUTH_AUTHORIZATION_URL,
-    tokenURL: process.env.OAUTH_TOKEN_URL,
-    clientID: process.env.OAUTH_CLIENT_ID,
-    clientSecret: process.env.OAUTH_CLIENT_SECRET,
-    callbackURL: process.env.OAUTH_CALLBACK_URL
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    // Store tokens and user info in the session
-    return cb(null, { accessToken, refreshToken, profile });
-  }
-));
+  const authUrl = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: scopes,
+    include_granted_scopes: true,
+    state: state,
+    prompt: 'consent' // Add this line to force consent screen
+  });
 
-// Serialize and deserialize user
-passport.serializeUser((user, done) => {
-  done(null, user);
+  res.redirect(authUrl);
 });
 
-passport.deserializeUser((user, done) => {
-  done(null, user);
+// Update the callback route to match GOOGLE_REDIRECT_URL
+app.get('/auth/oauth2/callback', async (req, res) => {
+  const { state, code, error } = req.query;
+
+  if (error) {
+    return res.redirect('http://localhost:5173/login?error=' + error);
+  }
+
+  if (state !== req.session.state) {
+    return res.redirect('http://localhost:5173/login?error=invalid_state');
+  }
+
+  try {
+    const { tokens } = await oauth2Client.getToken(code);
+    oauth2Client.setCredentials(tokens);
+
+    // Get user info
+    const oauth2 = google.oauth2('v2');
+    const { data } = await oauth2.userinfo.get({ auth: oauth2Client });
+
+    // Store user info in session
+    req.session.user = {
+      id: data.id,
+      email: data.email,
+      name: data.name,
+      picture: data.picture,
+      tokens
+    };
+
+    res.redirect('http://localhost:5173/dashboard');
+  } catch (error) {
+    console.error('OAuth error:', error);
+    res.redirect('http://localhost:5173/login?error=auth_error');
+  }
 });
 
-// OAuth routes
-app.get('/auth/oauth2', passport.authenticate('oauth2'));
-
-app.get('/auth/oauth2/callback',
-  passport.authenticate('oauth2', { failureRedirect: '/login' }),
-  (req, res) => {
-    // Successful authentication, redirect home.
-    res.redirect('/');
+// Check authentication status
+app.get('/auth/status', (req, res) => {
+  if (req.session.user) {
+    res.status(200).json({ 
+      authenticated: true, 
+      user: {
+        name: req.session.user.name,
+        email: req.session.user.email,
+        picture: req.session.user.picture
+      }
+    });
+  } else {
+    res.status(401).json({ authenticated: false });
   }
-);
+});
 
-// Auth middleware - protect routes
-const ensureAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
+// Logout endpoint
+app.post('/auth/logout', async (req, res) => {
+  if (req.session.user?.tokens?.access_token) {
+    try {
+      await oauth2Client.revokeToken(req.session.user.tokens.access_token);
+    } catch (error) {
+      console.error('Token revocation error:', error);
+    }
   }
-  res.status(401).json({ error: 'Unauthorized' });
-};
-
-// Routes
-// app.use('/api/map', ensureAuthenticated, dataMapRouter);
+  
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Session destruction error:', err);
+      return res.status(500).json({ success: false });
+    }
+    res.status(200).json({ success: true });
+  });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
