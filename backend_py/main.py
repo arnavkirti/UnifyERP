@@ -3,34 +3,36 @@ from pydantic import BaseModel
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from dotenv import load_dotenv
-from langchain.document_loaders import TextLoader
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from apscheduler.schedulers.background import BackgroundScheduler
 from langchain_core.documents import Document
+from langchain_community.document_loaders import TextLoader
+from fastapi import Query
 import json
 
 app = FastAPI()
 load_dotenv()
 
 # =========================== CONFIG ===========================
-VECTORSTORE_PATH = "../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema"
+VECTORSTORE_PATH_V1 = "../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema"
+VECTORSTORE_PATH_V2 = "../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema_v2"
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
-# =========================== UNIVERSAL SCHEMA HANDLING (MOCK) ===========================
+# =========================== UNIVERSAL SCHEMA HANDLING ===========================
 def get_universal_schema_for_invoice():
     loader = TextLoader("../backend/ERP/Universal_schema/schemas/invoice_schema.json")
     docs = loader.load()
-    return{
-        docs
-    }
+    return json.loads(docs[0].page_content) 
 
-# def update_universal_schema_in_db(updated_schema):
+def update_universal_schema_in_db(updated_schema):
+    print("✅ Universal schema updated (mock).")
+    global universal_schema
+    universal_schema = updated_schema
 
 # =========================== SCHEMA UPDATE LOGIC (MOCK) ===========================
 def handle_erp_schema_change(erp_name, erp_schema_data):
-    """Handles schema changes from a specific ERP."""
-    universal_schema = get_universal_schema_from_db()
+    universal_schema = get_universal_schema_for_invoice()
     llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-lite-preview-02-05', temperature=0.5)
     prompt = f"""
     {erp_name} Schema Change: {json.dumps(erp_schema_data)}
@@ -43,46 +45,17 @@ def handle_erp_schema_change(erp_name, erp_schema_data):
     except:
         proposed_changes_json = extract_json_from_response(proposed_changes)
 
-    # Human review and approval (implement this part).
-    approved_changes = proposed_changes_json # bypassing human review for mock purposes.
-
-    update_universal_schema_in_db(approved_changes)
+    update_universal_schema_in_db(proposed_changes_json)
     regenerate_vector_stores()
+    return proposed_changes_json 
 
 def regenerate_vector_stores():
-    """Regenerates all relevant vector stores."""
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
-    invoice_schema = get_universal_schema_from_db() # get the now updated universal schema
+    invoice_schema = get_universal_schema_for_invoice()
     docs_invoice = [Document(page_content=json.dumps(invoice_schema, indent=2))]
     vectorstore_invoice = FAISS.from_documents(docs_invoice, embeddings)
-    vectorstore_invoice.save_local(VECTORSTORE_PATH)
-
-    payment_terms_schema = get_universal_schema_from_db() # Assuming same universal schema for all, adjust if needed
-    docs_payment_terms = [Document(page_content=json.dumps(payment_terms_schema, indent=2))]
-    vectorstore_payment_terms = FAISS.from_documents(docs_payment_terms, embeddings)
-    vectorstore_payment_terms.save_local("../backend/ERP/Universal_schema/schemas/vectorstore/payment_schema")
-
-    job_schema = get_universal_schema_from_db() # Assuming same universal schema for all, adjust if needed
-    docs_job = [Document(page_content=json.dumps(job_schema, indent=2))]
-    vectorstore_job = FAISS.from_documents(docs_job, embeddings)
-    vectorstore_job.save_local("../backend/ERP/Universal_schema/schemas/vectorstore/job_schema")
-
+    vectorstore_invoice.save_local("../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema_v2")
     print("✅ Vector stores regenerated (mock).")
-
-# =========================== MOCK ERP SCHEMA CHANGES ===========================
-MOCK_ORACLE_SCHEMA_UPDATE = {
-    "invoiceNumber": "string",
-    "customerID": "string",
-    "newField": "integer",
-    "items": [{"productName": "string", "quantity": "integer", "price": "number"}]
-}
-
-MOCK_SAP_SCHEMA_UPDATE = {
-    "invoiceId": "string",
-    "customerNumber": "string",
-    "orderLines": [{"product": "string", "qty": "integer", "unitPrice": "number"}]
-}
 
 # =========================== SCHEDULED UPDATE (MOCK) ===========================
 def scheduled_schema_update():
@@ -96,11 +69,18 @@ scheduler.start()
 
 # =========================== LOAD VECTORS ===========================
 try:
-    invoice_vector_db = FAISS.load_local(
-        VECTORSTORE_PATH,
-        embeddings,
-        allow_dangerous_deserialization=True
-    )
+    invoice_vector_dbs = {
+        "v1": FAISS.load_local(
+            VECTORSTORE_PATH_V1,
+            embeddings,
+            allow_dangerous_deserialization=True,
+        ),
+        "v2": FAISS.load_local(
+            VECTORSTORE_PATH_V2,
+            embeddings,
+            allow_dangerous_deserialization=True,
+        ),
+    }
     payment_terms_vector_db = FAISS.load_local(
         "../backend/ERP/Universal_schema/schemas/vectorstore/payment_schema",
         embeddings,
@@ -111,7 +91,7 @@ try:
         embeddings,
         allow_dangerous_deserialization=True
     )
-    invoice_retriever = invoice_vector_db.as_retriever()
+    # invoice_retriever = invoice_vector_db.as_retriever()
     payment_terms_retriever = payment_terms_vector_db.as_retriever()
     job_retriever = job_schema_vector_db.as_retriever()
 except Exception as e:
@@ -120,7 +100,7 @@ except Exception as e:
 # =========================== PROMPT + LLM ===========================
 template = """You are a smart data mapper.
 Given a JSON response from {source} system and the schema doc below,
-convert the input into the standard format. Respond with ONLY valid JSON, no explanations, markdown, or formatting.
+convert the input into the standard format. Respond with ONLY valid JSON, no explanations, markdown, or formatting and if the input data is less than show the section with null.
 
 Schema Doc:
 {context}
@@ -160,23 +140,26 @@ class StandardizedInvoice(BaseModel):
 class StandardizedJob(BaseModel):
     standardized_job: dict
 
+class SchemaChangeRequest(BaseModel):
+    erp_schema: dict
 # =========================== ENDPOINTS ===========================
 @app.post("/map-invoice/", response_model=StandardizedInvoice)
-async def map_invoice(invoice_data: InvoiceData):
+async def map_invoice(invoice_data: InvoiceData, version: str = Query("v1", description="Version of the schema (v1 or v2)")):
     try:
+        if version not in invoice_vector_dbs:
+            raise HTTPException(status_code=400, detail="Invalid version. Must be v1 or v2")
+
         source = invoice_data.source
         input_json = json.dumps(invoice_data.data, indent=2)
-        docs = invoice_retriever.get_relevant_documents("invoice schema")
+        retriever = invoice_vector_dbs[version].as_retriever()
+        docs = retriever.get_relevant_documents("invoice schema")
         context = "\n\n".join([doc.page_content for doc in docs])
-        response = chain.run({
-            "source": source,
-            "input_json": input_json,
-            "context": context
-        })
+        response = chain.run({"source": source, "input_json": input_json, "context": context})
         parsed_response = json.loads(response) if is_valid_json(response) else extract_json_from_response(response)
         return {"standardized_invoice": parsed_response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
 @app.post("/map-payment-terms/", response_model=StandardizedPaymentTerms)
 async def map_payment_terms(payment_terms_data: PaymentTermsData):
     try:
@@ -209,6 +192,11 @@ async def map_job_schema(job_data: JobData):
         return {"standardized_job": parsed_response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/process-schema-change/")
+async def process_schema_change(schema_change_request: SchemaChangeRequest):
+    updated_schema = handle_erp_schema_change("Oracle/SAP", schema_change_request.erp_schema)
+    return {"updated_schema": updated_schema}
 
 def extract_json_from_response(text: str) -> dict:
     start = text.find('{')
