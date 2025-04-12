@@ -58,14 +58,16 @@ export default function ApiTesting() {
         requestBody = { source, data: parsedInput };
       }
       
-      // Make API request using axios instead of fetch
+      // Make API request using axios instead of fetch with CORS configuration
       const response = await axios.post(
         `http://localhost:8000${apiEndpoints[apiType]}`, 
         requestBody,
         {
           headers: {
             "Content-Type": "application/json",
-          }
+          },
+          // Add CORS configuration
+          withCredentials: false
         }
       );
       

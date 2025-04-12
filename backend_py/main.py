@@ -10,6 +10,7 @@ from langchain_core.documents import Document
 from langchain_community.document_loaders import TextLoader
 from fastapi import Query
 import json
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 load_dotenv()
@@ -222,3 +223,12 @@ def is_valid_json(myjson):
   except ValueError:
     return False
   return True
+
+# Add this near the top of your file, after creating the app instance
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # Your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
