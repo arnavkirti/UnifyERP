@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   BarChart3,
   FileText,
@@ -16,11 +17,32 @@ import {
   Calendar,
   ArrowUpRight,
   ArrowDownRight,
-  LogOut
+  LogOut,
+  ArrowRightLeft,
+  ExternalLink
 } from "lucide-react";
+import ApiTesting from "./ApiTesting";
 
 export default function Dashboard({ onLogout, user }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Determine active item based on current path
+  const getActiveItem = () => {
+    if (location.pathname === "/") return "Dashboard";
+    if (location.pathname === "/dashboard") return "Dashboard";
+    if (location.pathname === "/invoices") return "Invoices";
+    if (location.pathname === "/payments") return "Payments";
+    if (location.pathname === "/products") return "Products";
+    if (location.pathname === "/customers") return "Customers";
+    if (location.pathname === "/reports") return "Reports";
+    if (location.pathname === "/settings") return "Settings";
+    if (location.pathname === "/api-testing") return "API Testing";
+    return "Dashboard";
+  };
+  
+  const activeItem = getActiveItem();
 
   // Get user initials for avatar
   const getInitials = (name) => {
@@ -36,6 +58,16 @@ export default function Dashboard({ onLogout, user }) {
   const userInitials = user ? getInitials(user.name) : 'AU';
   const userName = user?.name || 'Admin User';
   const userEmail = user?.email || 'admin@unifyerp.com';
+
+  // Handle navigation item click
+  const handleNavItemClick = (label, path) => {
+    navigate(path);
+  };
+
+  // Handle API testing page navigation
+  const goToApiTestingPage = () => {
+    navigate('/api-testing');
+  };
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-gray-100">
@@ -66,18 +98,19 @@ export default function Dashboard({ onLogout, user }) {
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
             {[
-              { icon: <Home size={20} />, label: "Dashboard", active: true },
-              { icon: <FileText size={20} />, label: "Invoices", active: false },
-              { icon: <CreditCard size={20} />, label: "Payments", active: false },
-              { icon: <Package size={20} />, label: "Products", active: false },
-              { icon: <Users size={20} />, label: "Customers", active: false },
-              { icon: <BarChart3 size={20} />, label: "Reports", active: false },
-              { icon: <Settings size={20} />, label: "Settings", active: false },
+              { icon: <Home size={20} />, label: "Dashboard", path: "/", active: activeItem === "Dashboard" },
+              { icon: <FileText size={20} />, label: "Invoices", path: "/invoices", active: activeItem === "Invoices" },
+              { icon: <CreditCard size={20} />, label: "Payments", path: "/payments", active: activeItem === "Payments" },
+              { icon: <Package size={20} />, label: "Products", path: "/products", active: activeItem === "Products" },
+              { icon: <Users size={20} />, label: "Customers", path: "/customers", active: activeItem === "Customers" },
+              { icon: <BarChart3 size={20} />, label: "Reports", path: "/reports", active: activeItem === "Reports" },
+              { icon: <Settings size={20} />, label: "Settings", path: "/settings", active: activeItem === "Settings" },
+              { icon: <ArrowRightLeft size={20} />, label: "API Testing", path: "/api-testing", active: activeItem === "API Testing" },
             ].map((item, index) => (
               <li key={index}>
-                <a
-                  href="#"
-                  className={`flex items-center p-2 rounded-md ${
+                <button
+                  onClick={() => handleNavItemClick(item.label, item.path)}
+                  className={`flex items-center w-full p-2 rounded-md ${
                     item.active
                       ? "bg-orange-100 text-orange-600"
                       : "text-gray-600 hover:bg-gray-100"
@@ -85,7 +118,10 @@ export default function Dashboard({ onLogout, user }) {
                 >
                   <span className="mr-3">{item.icon}</span>
                   {isSidebarOpen && <span>{item.label}</span>}
-                </a>
+                  {isSidebarOpen && item.label === "API Testing" && (
+                    <ExternalLink className="ml-auto h-4 w-4" />
+                  )}
+                </button>
               </li>
             ))}
           </ul>
@@ -111,14 +147,14 @@ export default function Dashboard({ onLogout, user }) {
             )}
           </div>
           
-          {/* Add logout button to sidebar */}
-          {isSidebarOpen && onLogout && (
+          {/* Logout button - only in sidebar */}
+          {onLogout && (
             <button 
               onClick={onLogout}
               className="mt-4 flex items-center gap-2 w-full rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-200 transition-colors"
             >
               <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+              {isSidebarOpen && <span>Logout</span>}
             </button>
           )}
         </div>
@@ -146,21 +182,11 @@ export default function Dashboard({ onLogout, user }) {
               </button>
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">
-                  AU
+                  {userInitials}
                 </div>
-                <span className="text-sm font-medium text-gray-700">Admin User</span>
+                <span className="text-sm font-medium text-gray-700">{userName}</span>
                 <ChevronDown size={16} className="text-gray-500" />
               </div>
-              
-              {/* Add logout button to header for mobile/responsive view */}
-              {onLogout && (
-                <button 
-                  onClick={onLogout}
-                  className="hidden sm:flex items-center gap-1 text-red-600 hover:text-red-700"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
-              )}
             </div>
           </div>
         </header>
@@ -168,7 +194,7 @@ export default function Dashboard({ onLogout, user }) {
         {/* Dashboard Content */}
         <div className="p-6 w-full">
           <div className="flex items-center justify-between mb-6 w-full">
-            <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-800">{activeItem}</h1>
             <div className="flex items-center gap-2">
               <Calendar size={18} className="text-gray-500" />
               <span className="text-sm text-gray-600">
@@ -178,6 +204,29 @@ export default function Dashboard({ onLogout, user }) {
                   year: "numeric",
                 })}
               </span>
+            </div>
+          </div>
+
+          {/* API Testing Promotion Card */}
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-sm p-6 mb-6 text-white">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold mb-2">ERP API Standardization</h2>
+                <p className="text-orange-50 mb-4">
+                  Test our AI-powered API standardization tool. Convert any ERP API response to our universal format.
+                </p>
+                <button 
+                  onClick={goToApiTestingPage}
+                  className="inline-flex items-center gap-2 bg-white text-orange-600 px-4 py-2 rounded-md font-medium hover:bg-orange-50 transition-colors"
+                >
+                  <ArrowRightLeft className="h-4 w-4" />
+                  Try API Testing Tool
+                  <ExternalLink className="h-4 w-4 ml-1" />
+                </button>
+              </div>
+              <div className="hidden md:block">
+                <ArrowRightLeft className="h-24 w-24 text-orange-100 opacity-50" />
+              </div>
             </div>
           </div>
 

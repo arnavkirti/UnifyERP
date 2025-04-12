@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import {
   ChevronRight,
   Code,
@@ -12,6 +13,7 @@ import {
   UserPlus
 } from "lucide-react"
 import Dashboard from "./components/Dashboard"
+import ApiTesting from "./components/ApiTesting"
 import { authService } from "./services/authService"
 
 function App() {
@@ -49,10 +51,21 @@ function App() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
+  // If logged in, show the app with routes
   if (isLoggedIn) {
-    return <Dashboard onLogout={handleLogout} user={user} />;
+    return (
+      <Router>
+        <Routes>
+          <Route path="/" element={<Dashboard onLogout={handleLogout} user={user} />} />
+          <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} user={user} />} />
+          <Route path="/api-testing" element={<ApiTesting />} />
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </Router>
+    );
   }
 
+  // Landing page for non-logged in users
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
