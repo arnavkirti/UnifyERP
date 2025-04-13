@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
 import {
   ArrowRightLeft,
   Loader2,
@@ -10,9 +10,13 @@ import {
   ChevronUp,
   Copy,
   FileText,
-  ArrowLeft
+  ArrowLeft,
+  Shield,
+  AlertTriangle,
+  RefreshCw
 } from "lucide-react";
 import { sampleData } from "../utils/sampleData";
+import { apiService } from "../services/apiService";
 
 export default function ApiTesting() {
   const navigate = useNavigate();
@@ -25,18 +29,22 @@ export default function ApiTesting() {
   const [success, setSuccess] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
 
-  const apiEndpoints = {
-    invoice: "/map-invoice/",
-    payment: "/map-payment-terms/",
-    job: "/map-job-schema/",
-    schema: "/process-schema-change/"
-  };
+//   const apiEndpoints = {
+//     invoice: "/map-invoice/",
+//     payment: "/map-payment-terms/",
+//     job: "/map-job-schema/",
+//     schema: "/process-schema-change/",
+//     compatibility: "/check-api-compatibility/",
+//     issues: "/predict-integration-issues/"
+//   };
 
   const apiLabels = {
     invoice: "Invoice Standardization",
     payment: "Payment Terms Standardization",
     job: "Job Schema Standardization",
-    schema: "Process Schema Change"
+    schema: "Process Schema Change",
+    compatibility: "Check API Compatibility",
+    issues: "Predict Integration Issues"
   };
 
   const sources = ["Oracle", "SAP", "Microsoft Dynamics", "NetSuite", "Workday"];
@@ -49,45 +57,38 @@ export default function ApiTesting() {
     try {
       // Validate JSON input
       const parsedInput = JSON.parse(inputJson);
+      let result;
       
-      // Prepare request body based on API type
-      let requestBody;
-      if (apiType === "schema") {
-        requestBody = { erp_schema: parsedInput };
-      } else {
-        requestBody = { source, data: parsedInput };
+      // Handle different API types
+      switch(apiType) {
+        case 'invoice':
+          result = await apiService.mapInvoice(source, parsedInput);
+          setOutputJson(JSON.stringify(result.standardized_invoice, null, 2));
+          break;
+        case 'payment':
+          result = await apiService.mapPaymentTerms(source, parsedInput);
+          setOutputJson(JSON.stringify(result.standardized_payment_terms, null, 2));
+          break;
+        case 'job':
+          result = await apiService.mapJobSchema(source, parsedInput);
+          setOutputJson(JSON.stringify(result.standardized_job, null, 2));
+          break;
+        case 'schema':
+          result = await apiService.processSchemaChange(parsedInput);
+          setOutputJson(JSON.stringify(result.updated_schema, null, 2));
+          break;
+        case 'compatibility':
+          result = await apiService.checkApiCompatibility(source, parsedInput);
+          setOutputJson(JSON.stringify(result, null, 2));
+          break;
+        case 'issues':
+          result = await apiService.predictIntegrationIssues(source, parsedInput);
+          setOutputJson(JSON.stringify(result, null, 2));
+          break;
+        default:
+          throw new Error('Unknown API type');
       }
       
-      // Make API request using axios instead of fetch with CORS configuration
-      const response = await axios.post(
-        `http://localhost:8000${apiEndpoints[apiType]}`, 
-        requestBody,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          // Add CORS configuration
-          withCredentials: false
-        }
-      );
-      
-      // Axios automatically throws errors for non-2xx responses
-      // and parses JSON responses, so we can directly use response.data
-      const data = response.data;
-      
-      // Extract the standardized data based on API type
-      let standardizedData;
-      if (apiType === "invoice") {
-        standardizedData = data.standardized_invoice;
-      } else if (apiType === "payment") {
-        standardizedData = data.standardized_payment_terms;
-      } else if (apiType === "job") {
-        standardizedData = data.standardized_job;
-      } else {
-        standardizedData = data.updated_schema;
-      }
-      
-      setOutputJson(JSON.stringify(standardizedData, null, 2));
       setSuccess(true);
     } catch (err) {
       // Handle axios errors
@@ -108,7 +109,7 @@ export default function ApiTesting() {
       const parsed = JSON.parse(inputJson);
       setInputJson(JSON.stringify(parsed, null, 2));
     } catch (err) {
-        console.log(err);
+      console.log(err);
       setError("Invalid JSON format");
     }
   };
@@ -116,8 +117,29 @@ export default function ApiTesting() {
   const loadSampleData = () => {
     if (apiType === "schema") {
       setInputJson(JSON.stringify(sampleData[apiType], null, 2));
+    } else if (apiType === "compatibility" || apiType === "issues") {
+      // For compatibility and issues endpoints, we need schema data
+      setInputJson(JSON.stringify(sampleData.schema, null, 2));
     } else {
       setInputJson(JSON.stringify(sampleData[apiType][source], null, 2));
+    }
+  };
+
+  // Get the appropriate icon for the API type
+  const getApiIcon = (type) => {
+    switch(type) {
+      case 'invoice':
+      case 'payment':
+      case 'job':
+        return <ArrowRightLeft size={16} />;
+      case 'schema':
+        return <RefreshCw size={16} />;
+      case 'compatibility':
+        return <Shield size={16} />;
+      case 'issues':
+        return <AlertTriangle size={16} />;
+      default:
+        return <ArrowRightLeft size={16} />;
     }
   };
 
@@ -159,6 +181,7 @@ export default function ApiTesting() {
                   onClick={() => setShowOptions(!showOptions)}
                   className="flex items-center gap-2 bg-white border border-slate-300 rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                 >
+                  {getApiIcon(apiType)}
                   {apiLabels[apiType]}
                   {showOptions ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
@@ -173,11 +196,12 @@ export default function ApiTesting() {
                             setApiType(key);
                             setShowOptions(false);
                           }}
-                          className={`block px-4 py-2 text-sm w-full text-left ${
+                          className={`flex items-center gap-2 px-4 py-2 text-sm w-full text-left ${
                             apiType === key ? "bg-orange-50 text-orange-700 font-medium" : "text-slate-700 hover:bg-slate-50"
                           }`}
                           role="menuitem"
                         >
+                          {getApiIcon(key)}
                           {label}
                         </button>
                       ))}
@@ -186,7 +210,7 @@ export default function ApiTesting() {
                 )}
               </div>
 
-              {apiType !== "schema" && (
+              {(apiType !== "schema" && apiType !== "compatibility" && apiType !== "issues") ? (
                 <select
                   value={source}
                   onChange={(e) => setSource(e.target.value)}
@@ -198,6 +222,20 @@ export default function ApiTesting() {
                     </option>
                   ))}
                 </select>
+              ) : (
+                apiType === "schema" ? null : (
+                  <select
+                    value={source}
+                    onChange={(e) => setSource(e.target.value)}
+                    className="rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    {sources.map((src) => (
+                      <option key={src} value={src}>
+                        {src}
+                      </option>
+                    ))}
+                  </select>
+                )
               )}
             </div>
 
@@ -248,8 +286,10 @@ export default function ApiTesting() {
                 </>
               ) : (
                 <>
-                  <ArrowRightLeft className="h-4 w-4" />
-                  Standardize
+                  {getApiIcon(apiType)}
+                  {apiType === 'compatibility' ? 'Check Compatibility' : 
+                   apiType === 'issues' ? 'Predict Issues' : 
+                   apiType === 'schema' ? 'Process Schema' : 'Standardize'}
                 </>
               )}
             </button>
@@ -258,7 +298,11 @@ export default function ApiTesting() {
           {/* Right Panel - Output */}
           <div className="w-full md:w-1/2 flex flex-col bg-white rounded-lg shadow-sm border border-slate-200 p-4 md:p-5 h-full">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-slate-800">Standardized Output</h2>
+              <h2 className="text-sm font-semibold text-slate-800">
+                {apiType === 'compatibility' ? 'Compatibility Results' : 
+                 apiType === 'issues' ? 'Potential Issues' : 
+                 apiType === 'schema' ? 'Updated Schema' : 'Standardized Output'}
+              </h2>
               {outputJson && (
                 <button
                   onClick={() => copyToClipboard(outputJson)}
@@ -292,9 +336,12 @@ export default function ApiTesting() {
               ) : (
                 <div className="flex items-center justify-center h-full">
                   <div className="flex flex-col items-center text-center">
-                    <ArrowRightLeft className="h-8 w-8 text-slate-400 mb-2" />
-                    <p className="text-sm text-slate-500">
-                      Enter your JSON input and click "Standardize" to see the result
+                    {getApiIcon(apiType)}
+                    <p className="text-sm text-slate-500 mt-2">
+                      Enter your JSON input and click 
+                      {apiType === 'compatibility' ? ' "Check Compatibility"' : 
+                       apiType === 'issues' ? ' "Predict Issues"' : 
+                       apiType === 'schema' ? ' "Process Schema"' : ' "Standardize"'} to see the result
                     </p>
                   </div>
                 </div>
@@ -305,7 +352,10 @@ export default function ApiTesting() {
               <div className="mt-4 bg-green-50 border border-green-200 rounded-md p-3 flex items-center gap-2">
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
                 <p className="text-sm font-medium text-green-700">
-                  Successfully standardized {apiType} data
+                  {apiType === 'compatibility' ? 'Successfully checked compatibility' : 
+                   apiType === 'issues' ? 'Successfully predicted integration issues' : 
+                   apiType === 'schema' ? 'Successfully processed schema change' : 
+                   `Successfully standardized ${apiType} data`}
                 </p>
               </div>
             )}

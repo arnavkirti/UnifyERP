@@ -82,5 +82,47 @@ export const sampleData = {
         price: "number"
       }
     ]
+  },
+  // Sample data for compatibility check
+  compatibility: {
+    Oracle: {
+      invoiceNumber: "string",
+      customerID: "string",
+      issueDate: "date",
+      dueDate: "date",
+      totalAmount: "number",
+      currency: "string",
+      items: "array"
+    },
+    SAP: {
+      invoiceId: "string",
+      customerNumber: "string",
+      dateCreated: "date",
+      dateDue: "date",
+      totalValue: "number",
+      currencyCode: "string",
+      orderLines: "array"
+    }
+  },
+  // Sample data for integration issues prediction
+  issues: {
+    Oracle: {
+      invoiceNumber: "string",
+      customerID: "string",
+      issueDate: "date",
+      dueDate: "date",
+      totalAmount: "number",
+      currency: "string",
+      items: "array"
+    },
+    SAP: {
+      invoiceId: "string",
+      customerNumber: "string",
+      dateCreated: "date",
+      dateDue: "date",
+      totalValue: "number",
+      currencyCode: "string",
+      orderLines: "array"
+    }
   }
 };
