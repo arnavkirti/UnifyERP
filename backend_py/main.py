@@ -158,14 +158,18 @@ class CompatibilityRequest(BaseModel):
 
 # =========================== ENDPOINTS ===========================
 @app.post("/map-invoice/", response_model=StandardizedInvoice)
-async def map_invoice(invoice_data: InvoiceData, version: str = Query("v1", description="Version of the schema (v1 or v2)")):
+async def map_invoice(invoice_data: InvoiceData, version: str = Query("v2", description="Version of the schema (v1 or v2)")):
     try:
         if version not in invoice_vector_dbs:
             raise HTTPException(status_code=400, detail="Invalid version. Must be v1 or v2")
 
+        vector_db = invoice_vector_dbs.get(version)
+        if not vector_db:
+            raise HTTPException(status_code=400, detail=f"Version {version} not available")
+
         source = invoice_data.source
         input_json = json.dumps(invoice_data.data, indent=2)
-        retriever = invoice_vector_dbs[version].as_retriever()
+        retriever = vector_db.as_retriever() 
         docs = retriever.get_relevant_documents("invoice schema")
         context = "\n\n".join([doc.page_content for doc in docs])
         response = chain.run({"source": source, "input_json": input_json, "context": context})
@@ -222,20 +226,6 @@ async def check_api_compatibility(data: CompatibilityRequest):
         return extracted_json
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing compatibility: {str(e)}")
-
-
-@app.post("/predict-integration-issues/")
-async def predict_integration_issues(data: CompatibilityRequest):
-    try:
-        universal_schema = get_universal_schema_for_invoice()
-        response = integration_analytics_chain.run({
-            "erp_name": data.erp_name,
-            "erp_json": json.dumps(data.erp_schema, indent=2),
-            "universal_schema": json.dumps(universal_schema, indent=2)
-        })
-        return json.loads(response) if is_valid_json(response) else extract_json_from_response(response)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/process-schema-change/")
 async def process_schema_change(schema_change_request: SchemaChangeRequest):
