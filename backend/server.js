@@ -9,7 +9,7 @@ require('dotenv').config();
 const app = express();
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI);
+// mongoose.connect(process.env.MONGODB_URI);
 
 // Create OAuth2 client with proper configuration
 const oauth2Client = new google.auth.OAuth2(

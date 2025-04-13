@@ -10,6 +10,9 @@ from langchain_core.documents import Document
 from langchain_community.document_loaders import TextLoader
 from fastapi import Query
 import json
+from typing import Dict
+from prompt import api_compatibility_prompt, integration_issue_prompt
+from langchain.chains import LLMChain
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -19,6 +22,10 @@ load_dotenv()
 VECTORSTORE_PATH_V1 = "../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema"
 VECTORSTORE_PATH_V2 = "../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema_v2"
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+
+llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-lite-preview-02-05', temperature=0.5)
+api_compat_chain = LLMChain(llm=llm, prompt=api_compatibility_prompt)
+integration_analytics_chain = LLMChain(llm=llm, prompt=integration_issue_prompt)
 
 # =========================== UNIVERSAL SCHEMA HANDLING ===========================
 def get_universal_schema_for_invoice():
@@ -143,6 +150,12 @@ class StandardizedJob(BaseModel):
 
 class SchemaChangeRequest(BaseModel):
     erp_schema: dict
+    
+
+class CompatibilityRequest(BaseModel):
+    erp_name: str
+    erp_schema: Dict[str, str]
+
 # =========================== ENDPOINTS ===========================
 @app.post("/map-invoice/", response_model=StandardizedInvoice)
 async def map_invoice(invoice_data: InvoiceData, version: str = Query("v1", description="Version of the schema (v1 or v2)")):
@@ -177,6 +190,8 @@ async def map_payment_terms(payment_terms_data: PaymentTermsData):
         return {"standardized_payment_terms": parsed_response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+    
 @app.post("/map-job-schema/", response_model=StandardizedJob)
 async def map_job_schema(job_data: JobData):
     try:
@@ -191,6 +206,34 @@ async def map_job_schema(job_data: JobData):
         })
         parsed_response = json.loads(response) if is_valid_json(response) else extract_json_from_response(response)
         return {"standardized_job": parsed_response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/check-api-compatibility/")
+async def check_api_compatibility(data: CompatibilityRequest):
+    try:
+        universal_schema = get_universal_schema_for_invoice()
+        response = api_compat_chain.run({
+            "erp_name": data.erp_name,
+            "erp_json": json.dumps(data.erp_schema),
+            "universal_schema": json.dumps(universal_schema)
+        })
+        extracted_json = extract_json_from_response(response)
+        return extracted_json
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing compatibility: {str(e)}")
+
+
+@app.post("/predict-integration-issues/")
+async def predict_integration_issues(data: CompatibilityRequest):
+    try:
+        universal_schema = get_universal_schema_for_invoice()
+        response = integration_analytics_chain.run({
+            "erp_name": data.erp_name,
+            "erp_json": json.dumps(data.erp_schema, indent=2),
+            "universal_schema": json.dumps(universal_schema, indent=2)
+        })
+        return json.loads(response) if is_valid_json(response) else extract_json_from_response(response)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
