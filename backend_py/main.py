@@ -11,7 +11,7 @@ from langchain_community.document_loaders import TextLoader
 from fastapi import Query
 import json
 from typing import Dict
-from prompt import api_compatibility_prompt, integration_issue_prompt
+from prompt import api_compatibility_prompt
 from langchain.chains import LLMChain
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -25,8 +25,6 @@ embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-lite-preview-02-05', temperature=0.5)
 api_compat_chain = LLMChain(llm=llm, prompt=api_compatibility_prompt)
-integration_analytics_chain = LLMChain(llm=llm, prompt=integration_issue_prompt)
-
 # =========================== UNIVERSAL SCHEMA HANDLING ===========================
 def get_universal_schema_for_invoice():
     loader = TextLoader("../backend/ERP/Universal_schema/schemas/invoice_schema.json")
@@ -256,12 +254,3 @@ def is_valid_json(myjson):
   except ValueError:
     return False
   return True
-
-# Add this near the top of your file, after creating the app instance
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],  # Your frontend URL
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
