@@ -19,7 +19,11 @@ import {
   ArrowDownRight,
   LogOut,
   ArrowRightLeft,
-  ExternalLink
+  ExternalLink,
+  Activity,
+  Zap,
+  Shield,
+  TrendingUp
 } from "lucide-react";
 import ApiTesting from "./ApiTesting";
 
@@ -70,56 +74,103 @@ export default function Dashboard({ onLogout, user }) {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-gray-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50">
       {/* Sidebar */}
       <div
         className={`${
           isSidebarOpen ? "w-64" : "w-20"
-        } bg-white shadow-md transition-all duration-300 ease-in-out flex flex-col shrink-0`}
+        } bg-white shadow-md transition-all duration-300 ease-in-out flex flex-col shrink-0 border-r border-slate-200`}
       >
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b border-slate-200">
           {isSidebarOpen ? (
             <div className="flex items-center gap-2">
-              <span className="font-bold text-gray-800">UnifyERP</span>
+              <div className="w-8 h-8 bg-orange-600 rounded-md flex items-center justify-center text-white font-bold">UE</div>
+              <span className="font-bold text-slate-800">UnifyERP</span>
             </div>
           ) : (
             <div className="flex justify-center w-full">
-              <span className="font-bold text-gray-800 text-sm">UE</span>
+              <div className="w-8 h-8 bg-orange-600 rounded-md flex items-center justify-center text-white font-bold">UE</div>
             </div>
           )}
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className={`text-gray-500 hover:text-gray-700 ${!isSidebarOpen ? "absolute right-2" : ""}`}
+            className={`text-slate-500 hover:text-slate-700 ${!isSidebarOpen ? "absolute right-2" : ""}`}
           >
             {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
         <nav className="flex-1 p-4">
-          <ul className="space-y-2">
+          <div className={`${isSidebarOpen ? "mb-4" : "mb-6"}`}>
+            {isSidebarOpen && <p className="text-xs font-medium text-slate-400 uppercase mb-2 ml-2">Main Menu</p>}
+          </div>
+          <ul className="space-y-1.5">
             {[
               { icon: <Home size={20} />, label: "Dashboard", path: "/", active: activeItem === "Dashboard" },
               { icon: <FileText size={20} />, label: "Invoices", path: "/invoices", active: activeItem === "Invoices" },
               { icon: <CreditCard size={20} />, label: "Payments", path: "/payments", active: activeItem === "Payments" },
               { icon: <Package size={20} />, label: "Products", path: "/products", active: activeItem === "Products" },
               { icon: <Users size={20} />, label: "Customers", path: "/customers", active: activeItem === "Customers" },
-              { icon: <BarChart3 size={20} />, label: "Reports", path: "/reports", active: activeItem === "Reports" },
-              { icon: <Settings size={20} />, label: "Settings", path: "/settings", active: activeItem === "Settings" },
-              { icon: <ArrowRightLeft size={20} />, label: "API Testing", path: "/api-testing", active: activeItem === "API Testing" },
             ].map((item, index) => (
               <li key={index}>
                 <button
                   onClick={() => handleNavItemClick(item.label, item.path)}
-                  className={`flex items-center w-full p-2 rounded-md ${
+                  className={`flex items-center w-full p-2.5 rounded-md ${
                     item.active
-                      ? "bg-orange-100 text-orange-600"
-                      : "text-gray-600 hover:bg-gray-100"
+                      ? "bg-orange-50 text-orange-600 font-medium"
+                      : "text-slate-600 hover:bg-slate-100"
                   }`}
                 >
                   <span className="mr-3">{item.icon}</span>
                   {isSidebarOpen && <span>{item.label}</span>}
-                  {isSidebarOpen && item.label === "API Testing" && (
-                    <ExternalLink className="ml-auto h-4 w-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {isSidebarOpen && <p className="text-xs font-medium text-slate-400 uppercase mt-6 mb-2 ml-2">Analytics</p>}
+          <ul className="space-y-1.5">
+            {[
+              { icon: <BarChart3 size={20} />, label: "Reports", path: "/reports", active: activeItem === "Reports" },
+              { icon: <Activity size={20} />, label: "Analytics", path: "/analytics", active: activeItem === "Analytics" },
+            ].map((item, index) => (
+              <li key={index}>
+                <button
+                  onClick={() => handleNavItemClick(item.label, item.path)}
+                  className={`flex items-center w-full p-2.5 rounded-md ${
+                    item.active
+                      ? "bg-orange-50 text-orange-600 font-medium"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  {isSidebarOpen && <span>{item.label}</span>}
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {isSidebarOpen && <p className="text-xs font-medium text-slate-400 uppercase mt-6 mb-2 ml-2">System</p>}
+          <ul className="space-y-1.5">
+            {[
+              { icon: <Settings size={20} />, label: "Settings", path: "/settings", active: activeItem === "Settings" },
+              { icon: <ArrowRightLeft size={20} />, label: "API Testing", path: "/api-testing", active: activeItem === "API Testing", special: true },
+            ].map((item, index) => (
+              <li key={index}>
+                <button
+                  onClick={() => handleNavItemClick(item.label, item.path)}
+                  className={`flex items-center w-full p-2.5 rounded-md ${
+                    item.active
+                      ? "bg-orange-50 text-orange-600 font-medium"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="mr-3">{item.icon}</span>
+                  {isSidebarOpen && (
+                    <div className="flex items-center justify-between w-full">
+                      <span>{item.label}</span>
+                      {item.special && <ExternalLink className="h-4 w-4" />}
+                    </div>
                   )}
                 </button>
               </li>
@@ -127,7 +178,7 @@ export default function Dashboard({ onLogout, user }) {
           </ul>
         </nav>
 
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-slate-200 mt-auto">
           <div className="flex items-center gap-3">
             {isSidebarOpen && (
               <>
@@ -135,8 +186,8 @@ export default function Dashboard({ onLogout, user }) {
                   {userInitials}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-700">{userName}</p>
-                  <p className="text-xs text-gray-500">{userEmail}</p>
+                  <p className="text-sm font-medium text-slate-700">{userName}</p>
+                  <p className="text-xs text-slate-500">{userEmail}</p>
                 </div>
               </>
             )}
@@ -151,7 +202,7 @@ export default function Dashboard({ onLogout, user }) {
           {onLogout && (
             <button 
               onClick={onLogout}
-              className="mt-4 flex items-center gap-2 w-full rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-200 transition-colors"
+              className="mt-4 flex items-center gap-2 w-full rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-100 transition-colors"
             >
               <LogOut className="h-4 w-4" />
               {isSidebarOpen && <span>Logout</span>}
@@ -163,10 +214,10 @@ export default function Dashboard({ onLogout, user }) {
       {/* Main Content */}
       <div className="flex-1 overflow-auto w-full">
         {/* Header */}
-        <header className="bg-white shadow-sm p-4 w-full">
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center rounded-md bg-gray-100 px-3 py-2 w-64">
-              <Search size={18} className="text-gray-500 mr-2" />
+        <header className="bg-white shadow-sm p-4 w-full sticky top-0 z-10 border-b border-slate-200">
+          <div className="flex items-center justify-between w-full max-w-7xl mx-auto">
+            <div className="flex items-center rounded-md bg-slate-100 px-3 py-2 w-64 border border-slate-200">
+              <Search size={18} className="text-slate-500 mr-2" />
               <input
                 type="text"
                 placeholder="Search..."
@@ -174,30 +225,33 @@ export default function Dashboard({ onLogout, user }) {
               />
             </div>
             <div className="flex items-center gap-4">
-              <button className="relative text-gray-500 hover:text-gray-700">
+              <button className="relative text-slate-500 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100">
                 <Bell size={20} />
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                   3
                 </span>
               </button>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
                 <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold">
                   {userInitials}
                 </div>
-                <span className="text-sm font-medium text-gray-700">{userName}</span>
-                <ChevronDown size={16} className="text-gray-500" />
+                <span className="text-sm font-medium text-slate-700">{userName}</span>
+                <ChevronDown size={16} className="text-slate-500" />
               </div>
             </div>
           </div>
         </header>
 
         {/* Dashboard Content */}
-        <div className="p-6 w-full">
+        <div className="p-6 w-full max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-6 w-full">
-            <h1 className="text-2xl font-bold text-gray-800">{activeItem}</h1>
-            <div className="flex items-center gap-2">
-              <Calendar size={18} className="text-gray-500" />
-              <span className="text-sm text-gray-600">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-800">{activeItem}</h1>
+              <p className="text-sm text-slate-500 mt-1">Welcome back to your ERP dashboard</p>
+            </div>
+            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-md border border-slate-200 shadow-sm">
+              <Calendar size={18} className="text-slate-500" />
+              <span className="text-sm text-slate-600">
                 {new Date().toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -208,16 +262,17 @@ export default function Dashboard({ onLogout, user }) {
           </div>
 
           {/* API Testing Promotion Card */}
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-sm p-6 mb-6 text-white">
-            <div className="flex items-center justify-between">
+          <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg shadow-sm p-6 mb-6 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -mt-20 -mr-20"></div>
+            <div className="flex items-center justify-between relative z-10">
               <div>
                 <h2 className="text-xl font-semibold mb-2">ERP API Standardization</h2>
-                <p className="text-orange-50 mb-4">
-                  Test our AI-powered API standardization tool. Convert any ERP API response to our universal format.
+                <p className="text-orange-50 mb-4 max-w-xl">
+                  Test our AI-powered API standardization tool. Convert any ERP API response to our universal format with a single click.
                 </p>
                 <button 
                   onClick={goToApiTestingPage}
-                  className="inline-flex items-center gap-2 bg-white text-orange-600 px-4 py-2 rounded-md font-medium hover:bg-orange-50 transition-colors"
+                  className="inline-flex items-center gap-2 bg-white text-orange-600 px-4 py-2 rounded-md font-medium hover:bg-orange-50 transition-colors shadow-sm"
                 >
                   <ArrowRightLeft className="h-4 w-4" />
                   Try API Testing Tool
@@ -232,66 +287,116 @@ export default function Dashboard({ onLogout, user }) {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-gray-600 text-sm font-medium">Total Revenue</h3>
-                <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">+12.5%</span>
+                <h3 className="text-slate-600 text-sm font-medium">Total Revenue</h3>
+                <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <TrendingUp size={12} />
+                  +12.5%
+                </span>
               </div>
               <div className="flex items-center gap-4">
-                <DollarSign className="h-8 w-8 text-orange-600" />
+                <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-orange-600" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">$24,560</p>
-                  <p className="text-sm text-gray-500">+2.5k this week</p>
+                  <p className="text-2xl font-bold text-slate-900">$24,560</p>
+                  <p className="text-sm text-slate-500">+2.5k this week</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-gray-600 text-sm font-medium">Total Orders</h3>
-                <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full">+8.2%</span>
+                <h3 className="text-slate-600 text-sm font-medium">Total Orders</h3>
+                <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <TrendingUp size={12} />
+                  +8.2%
+                </span>
               </div>
               <div className="flex items-center gap-4">
-                <Package className="h-8 w-8 text-orange-600" />
+                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                  <Package className="h-6 w-6 text-blue-600" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">1,240</p>
-                  <p className="text-sm text-gray-500">+180 this week</p>
+                  <p className="text-2xl font-bold text-slate-900">1,240</p>
+                  <p className="text-sm text-slate-500">+180 this week</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-gray-600 text-sm font-medium">Total Customers</h3>
-                <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">-3.1%</span>
+                <h3 className="text-slate-600 text-sm font-medium">Total Customers</h3>
+                <span className="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                  <TrendingUp size={12} className="rotate-180" />
+                  -3.1%
+                </span>
               </div>
               <div className="flex items-center gap-4">
-                <Users className="h-8 w-8 text-orange-600" />
+                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                  <Users className="h-6 w-6 text-purple-600" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">3,120</p>
-                  <p className="text-sm text-gray-500">-32 this week</p>
+                  <p className="text-2xl font-bold text-slate-900">3,120</p>
+                  <p className="text-sm text-slate-500">-32 this week</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-gray-600 text-sm font-medium">Pending Invoices</h3>
+                <h3 className="text-slate-600 text-sm font-medium">Pending Invoices</h3>
                 <span className="bg-yellow-100 text-yellow-600 text-xs px-2 py-1 rounded-full">Pending</span>
               </div>
               <div className="flex items-center gap-4">
-                <FileText className="h-8 w-8 text-orange-600" />
+                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                  <FileText className="h-6 w-6 text-yellow-600" />
+                </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">15</p>
-                  <p className="text-sm text-gray-500">Need attention</p>
+                  <p className="text-2xl font-bold text-slate-900">15</p>
+                  <p className="text-sm text-slate-500">Need attention</p>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center mb-4">
+                <Zap className="h-5 w-5 text-blue-600" />
+              </div>
+              <h3 className="text-slate-800 font-medium mb-2">Quick Actions</h3>
+              <p className="text-slate-500 text-sm mb-4">Access frequently used tools and actions in one place.</p>
+              <button className="text-blue-600 text-sm font-medium hover:text-blue-700">Get Started →</button>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 rounded-md bg-green-100 flex items-center justify-center mb-4">
+                <Shield className="h-5 w-5 text-green-600" />
+              </div>
+              <h3 className="text-slate-800 font-medium mb-2">Security Center</h3>
+              <p className="text-slate-500 text-sm mb-4">Review and enhance your account security settings.</p>
+              <button className="text-green-600 text-sm font-medium hover:text-green-700">View Settings →</button>
+            </div>
+            
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
+              <div className="w-10 h-10 rounded-md bg-purple-100 flex items-center justify-center mb-4">
+                <Activity className="h-5 w-5 text-purple-600" />
+              </div>
+              <h3 className="text-slate-800 font-medium mb-2">System Health</h3>
+              <p className="text-slate-500 text-sm mb-4">Monitor the performance and status of your ERP system.</p>
+              <button className="text-purple-600 text-sm font-medium hover:text-purple-700">Check Status →</button>
+            </div>
+          </div>
+
           {/* Recent Activity */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h2>
+          <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-slate-800">Recent Activity</h2>
+              <button className="text-sm text-orange-600 font-medium hover:text-orange-700">View All</button>
+            </div>
             <div className="space-y-4">
               {[
                 {
@@ -316,13 +421,17 @@ export default function Dashboard({ onLogout, user }) {
                 <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
                   <div className="flex items-center gap-3">
                     {activity.status === "success" ? (
-                      <ArrowUpRight className="h-4 w-4 text-green-500" />
+                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                        <ArrowUpRight className="h-4 w-4 text-green-600" />
+                      </div>
                     ) : (
-                      <ArrowDownRight className="h-4 w-4 text-red-500" />
+                      <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                        <ArrowDownRight className="h-4 w-4 text-red-600" />
+                      </div>
                     )}
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{activity.title}</p>
-                      <p className="text-xs text-gray-500">{activity.time}</p>
+                      <p className="text-sm font-medium text-slate-900">{activity.title}</p>
+                      <p className="text-xs text-slate-500">{activity.time}</p>
                     </div>
                   </div>
                   <span className={`text-sm font-medium ${
