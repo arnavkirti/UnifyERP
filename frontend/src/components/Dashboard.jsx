@@ -26,6 +26,32 @@ import {
   TrendingUp
 } from "lucide-react";
 import ApiTesting from "./ApiTesting";
+import { mockData } from "../utils/mockData";
+// First, add these imports at the top of the file
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+} from 'chart.js';
+
+// Register ChartJS components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement
+);
+import { Bar, Line } from 'react-chartjs-2';
 
 export default function Dashboard({ onLogout, user }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -40,8 +66,7 @@ export default function Dashboard({ onLogout, user }) {
     if (location.pathname === "/payments") return "Payments";
     if (location.pathname === "/products") return "Products";
     if (location.pathname === "/customers") return "Customers";
-    if (location.pathname === "/reports") return "Reports";
-    if (location.pathname === "/settings") return "Settings";
+    if (location.pathname === "/analytics") return "Analytics";
     if (location.pathname === "/api-testing") return "API Testing";
     return "Dashboard";
   };
@@ -73,6 +98,217 @@ export default function Dashboard({ onLogout, user }) {
     navigate('/api-testing');
   };
 
+  const invoiceData = mockData.invoices.map(invoice => parseFloat(invoice.amount.replace(/[^0-9.-]+/g, "")));
+    const paymentData = mockData.payments.map(payment => parseFloat(payment.amount.replace(/[^0-9.-]+/g, "")));
+
+    const barData = {
+      labels: mockData.invoices.map(invoice => invoice.customer),
+      datasets: [
+        {
+          label: 'Invoice Amounts',
+          data: invoiceData,
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+
+    const lineData = {
+      labels: mockData.payments.map(payment => payment.date),
+      datasets: [
+        {
+          label: 'Payments Over Time',
+          data: paymentData,
+          fill: false,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          tension: 0.4,
+        },
+      ],
+    };
+
+    const options = {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+        title: {
+          display: true,
+          text: 'Financial Overview',
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+    };
+
+
+  const renderContent = () => {
+    switch (activeItem) {
+      case "Invoices":
+        return (
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-800">All Invoices</h2>
+              <button className="flex items-center gap-1 text-sm bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded-md text-white">
+                New Invoice
+              </button>
+            </div>
+            <table className="w-full">
+              <thead className="bg-slate-50 text-left">
+                <tr>
+                  <th className="px-4 py-3 text-sm font-medium text-slate-500">Invoice #</th>
+                  <th className="px-4 py-3 text-sm font-medium text-slate-500">Customer</th>
+                  <th className="px-4 py-3 text-sm font-medium text-slate-500">Date</th>
+                  <th className="px-4 py-3 text-sm font-medium text-slate-500">Amount</th>
+                  <th className="px-4 py-3 text-sm font-medium text-slate-500">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mockData.invoices.map((invoice) => (
+                  <tr key={invoice.id} className="border-t border-slate-200 hover:bg-slate-50">
+                    <td className="px-4 py-3 text-sm font-medium text-slate-700">{invoice.id}</td>
+                    <td className="px-4 py-3 text-sm text-slate-600">{invoice.customer}</td>
+                    <td className="px-4 py-3 text-sm text-slate-600">{invoice.date}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-slate-700">{invoice.amount}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        invoice.status === "Paid" ? "bg-green-100 text-green-800" :
+                        invoice.status === "Pending" ? "bg-yellow-100 text-yellow-800" :
+                        "bg-red-100 text-red-800"
+                      }`}>
+                        {invoice.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        );
+    
+    case "Payments":
+      return (
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b border-slate-200">
+            <h2 className="text-lg font-semibold text-slate-800">All Payments</h2>
+          </div>
+          <table className="w-full">
+            <thead className="bg-slate-50 text-left">
+              <tr>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Payment #</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Customer</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Date</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Amount</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Method</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mockData.payments.map((payment) => (
+                <tr key={payment.id} className="border-t border-slate-200 hover:bg-slate-50">
+                  <td className="px-4 py-3 text-sm font-medium text-slate-700">{payment.id}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{payment.customer}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{payment.date}</td>
+                  <td className="px-4 py-3 text-sm font-medium text-slate-700">{payment.amount}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{payment.method}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    
+    case "Products":
+      return (
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b border-slate-200">
+            <h2 className="text-lg font-semibold text-slate-800">All Products</h2>
+          </div>
+          <table className="w-full">
+            <thead className="bg-slate-50 text-left">
+              <tr>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Product ID</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Name</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Price</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Stock</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Category</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mockData.products.map((product) => (
+                <tr key={product.id} className="border-t border-slate-200 hover:bg-slate-50">
+                  <td className="px-4 py-3 text-sm font-medium text-slate-700">{product.id}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{product.name}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{product.price}</td>
+                  <td className="px-4 py-3 text-sm font-medium text-slate-700">{product.stock}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{product.category}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    
+    case "Customers":
+      return (
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          <div className="flex items-center justify-between p-4 border-b border-slate-200">
+            <h2 className="text-lg font-semibold text-slate-800">All Customers</h2>
+          </div>
+          <table className="w-full">
+            <thead className="bg-slate-50 text-left">
+              <tr>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Customer ID</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Name</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Email</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Location</th>
+                <th className="px-4 py-3 text-sm font-medium text-slate-500">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {mockData.customers.map((customer) => (
+                <tr key={customer.id} className="border-t border-slate-200 hover:bg-slate-50">
+                  <td className="px-4 py-3 text-sm font-medium text-slate-700">{customer.id}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{customer.name}</td>
+                  <td className="px-4 py-3 text-sm text-slate-600">{customer.email}</td>
+                  <td className="px-4 py-3 text-sm font-medium text-slate-700">{customer.location}</td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      customer.status === "Active" ? "bg-green-100 text-green-800" :
+                      "bg-red-100 text-red-800"
+                    }`}>
+                      {customer.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    
+    case "Analytics":
+    return (
+      <div className="p-6">
+        <h2 className="text-lg font-semibold text-slate-800 mb-4">Analytics Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 border border-slate-200">
+            <h3 className="text-sm font-medium text-slate-600 mb-2">Invoice Amounts by Customer</h3>
+            <Bar data={barData} options={options} />
+          </div>
+          <div className="bg-white rounded-lg shadow-sm p-4 border border-slate-200">
+            <h3 className="text-sm font-medium text-slate-600 mb-2">Payments Over Time</h3>
+            <Line data={lineData} options={options} />
+          </div>
+        </div>
+      </div>
+    );
+     }
+};
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-slate-50">
       {/* Sidebar */}
@@ -106,7 +342,7 @@ export default function Dashboard({ onLogout, user }) {
           </div>
           <ul className="space-y-1.5">
             {[
-              { icon: <Home size={20} />, label: "Dashboard", path: "/", active: activeItem === "Dashboard" },
+              { icon: <Home size={20} />, label: "Dashboard", path: "/dashboard", active: activeItem === "Dashboard" },
               { icon: <FileText size={20} />, label: "Invoices", path: "/invoices", active: activeItem === "Invoices" },
               { icon: <CreditCard size={20} />, label: "Payments", path: "/payments", active: activeItem === "Payments" },
               { icon: <Package size={20} />, label: "Products", path: "/products", active: activeItem === "Products" },
@@ -131,8 +367,7 @@ export default function Dashboard({ onLogout, user }) {
           {isSidebarOpen && <p className="text-xs font-medium text-slate-400 uppercase mt-6 mb-2 ml-2">Analytics</p>}
           <ul className="space-y-1.5">
             {[
-              { icon: <BarChart3 size={20} />, label: "Reports", path: "/reports", active: activeItem === "Reports" },
-              { icon: <Activity size={20} />, label: "Analytics", path: "/analytics", active: activeItem === "Analytics" },
+                { icon: <Activity size={20} />, label: "Analytics", path: "/analytics", active: activeItem === "Analytics" },
             ].map((item, index) => (
               <li key={index}>
                 <button
@@ -153,7 +388,6 @@ export default function Dashboard({ onLogout, user }) {
           {isSidebarOpen && <p className="text-xs font-medium text-slate-400 uppercase mt-6 mb-2 ml-2">System</p>}
           <ul className="space-y-1.5">
             {[
-              { icon: <Settings size={20} />, label: "Settings", path: "/settings", active: activeItem === "Settings" },
               { icon: <ArrowRightLeft size={20} />, label: "API Testing", path: "/api-testing", active: activeItem === "API Testing", special: true },
             ].map((item, index) => (
               <li key={index}>
@@ -392,10 +626,10 @@ export default function Dashboard({ onLogout, user }) {
           </div>
 
           {/* Recent Activity */}
-          <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200">
+          <div className="bg-white rounded-lg shadow-sm p-6 gap-5 border border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-slate-800">Recent Activity</h2>
-              <button className="text-sm text-orange-600 font-medium hover:text-orange-700">View All</button>
+              {/* <button className="text-sm text-orange-600 font-medium hover:text-orange-700">View All</button> */}
             </div>
             <div className="space-y-4">
               {[
@@ -443,6 +677,7 @@ export default function Dashboard({ onLogout, user }) {
               ))}
             </div>
           </div>
+      {renderContent()}
         </div>
       </div>
     </div>

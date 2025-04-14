@@ -58,6 +58,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard onLogout={handleLogout} user={user} />} />
           <Route path="/dashboard" element={<Dashboard onLogout={handleLogout} user={user} />} />
+          <Route path="/invoices" element={<Dashboard onLogout={handleLogout} user={user} />} />
+          <Route path="/payments" element={<Dashboard onLogout={handleLogout} user={user} />} />
+          <Route path="/products" element={<Dashboard onLogout={handleLogout} user={user} />} />
+          <Route path="/customers" element={<Dashboard onLogout={handleLogout} user={user} />} />
+          <Route path="/analytics" element={<Dashboard onLogout={handleLogout} user={user} />} />
           <Route path="/api-testing" element={<ApiTesting />} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
