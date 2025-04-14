@@ -19,15 +19,15 @@ app = FastAPI()
 load_dotenv()
 
 # =========================== CONFIG ===========================
-VECTORSTORE_PATH_V1 = "../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema"
-VECTORSTORE_PATH_V2 = "../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema_v2"
+VECTORSTORE_PATH_V1 = "schemas/vectorstore/invoice_schema"
+VECTORSTORE_PATH_V2 = "schemas/vectorstore/invoice_schema_v2"
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 llm = ChatGoogleGenerativeAI(model='gemini-2.0-flash-lite-preview-02-05', temperature=0.5)
 api_compat_chain = LLMChain(llm=llm, prompt=api_compatibility_prompt)
 # =========================== UNIVERSAL SCHEMA HANDLING ===========================
 def get_universal_schema_for_invoice():
-    loader = TextLoader("../backend/ERP/Universal_schema/schemas/invoice_schema.json")
+    loader = TextLoader("schemas/invoice_schema.json")
     docs = loader.load()
     return json.loads(docs[0].page_content) 
 
@@ -60,7 +60,7 @@ def regenerate_vector_stores():
     invoice_schema = get_universal_schema_for_invoice()
     docs_invoice = [Document(page_content=json.dumps(invoice_schema, indent=2))]
     vectorstore_invoice = FAISS.from_documents(docs_invoice, embeddings)
-    vectorstore_invoice.save_local("../backend/ERP/Universal_schema/schemas/vectorstore/invoice_schema_v2")
+    vectorstore_invoice.save_local("schemas/vectorstore/invoice_schema_v2")
     print("✅ Vector stores regenerated (mock).")
 
 # =========================== SCHEDULED UPDATE (MOCK) ===========================
@@ -88,12 +88,12 @@ try:
         ),
     }
     payment_terms_vector_db = FAISS.load_local(
-        "../backend/ERP/Universal_schema/schemas/vectorstore/payment_schema",
+        "schemas/vectorstore/payment_schema",
         embeddings,
         allow_dangerous_deserialization=True
     )
     job_schema_vector_db = FAISS.load_local(
-        "../backend/ERP/Universal_schema/schemas/vectorstore/job_schema",
+        "schemas/vectorstore/job_schema",
         embeddings,
         allow_dangerous_deserialization=True
     )
