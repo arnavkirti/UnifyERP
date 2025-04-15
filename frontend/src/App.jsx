@@ -15,6 +15,7 @@ import {
 import Dashboard from "./components/Dashboard"
 import ApiTesting from "./components/ApiTesting"
 import { authService } from "./services/authService"
+import Documentation from "./components/Documentation";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -64,6 +65,7 @@ function App() {
           <Route path="/customers" element={<Dashboard onLogout={handleLogout} user={user} />} />
           <Route path="/analytics" element={<Dashboard onLogout={handleLogout} user={user} />} />
           <Route path="/api-testing" element={<ApiTesting />} />
+          <Route path="/documentation" element={<Documentation />} /> {/* Add this line */}
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>
       </Router>

@@ -68,6 +68,7 @@ export default function Dashboard({ onLogout, user }) {
     if (location.pathname === "/customers") return "Customers";
     if (location.pathname === "/analytics") return "Analytics";
     if (location.pathname === "/api-testing") return "API Testing";
+    if (location.pathname === "/documentation") return "Documentation";
     return "Dashboard";
   };
   
@@ -389,6 +390,7 @@ export default function Dashboard({ onLogout, user }) {
           <ul className="space-y-1.5">
             {[
               { icon: <ArrowRightLeft size={20} />, label: "API Testing", path: "/api-testing", active: activeItem === "API Testing", special: true },
+              { icon: <FileText size={20} />, label: "Documentation", path: "/documentation", active: activeItem === "Documentation", special: true },
             ].map((item, index) => (
               <li key={index}>
                 <button

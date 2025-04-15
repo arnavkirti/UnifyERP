@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docs": "jsdoc -c jsdoc.config.js",
+    "docs:md": "node scripts/generate-docs.js",
+    "docs:serve": "npx serve docs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.3",
