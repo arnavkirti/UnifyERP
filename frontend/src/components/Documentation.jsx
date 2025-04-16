@@ -515,8 +515,7 @@ export default function Documentation() {
                     </div>
                   </div>
                   <div className="p-4">
-                    <p className="text-gray-700 mb-4 text-sm">{endpoint.description}</p>
-                    
+                    <p className="text-gray-700 mb-4 text-sm">{endpoint.description}</p>                                        
                     <div className="space-y-4">
                       <div>
                         <h4 className="font-semibold mb-3">Request</h4>
