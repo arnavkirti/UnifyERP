@@ -498,26 +498,26 @@ export default function Documentation() {
           )}
 
           {activeTab === 'api-endpoints' && (
-            <div className="space-y-8">
+            <div className="space-y-8 max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold">API Endpoints</h2>
               <p className="text-gray-600">This API provides the following endpoints:</p>
 
               {filteredEndpoints.map((endpoint, index) => (
                 <div key={index} className="border rounded-xl overflow-hidden">
-                  <div className="bg-gray-50 p-6 border-b">
-                    <div className="flex items-center gap-4">
-                      <span className={`px-3 py-1 rounded-md text-sm font-medium ${
+                  <div className="bg-gray-50 p-4 border-b">
+                    <div className="flex items-center gap-3">
+                      <span className={`px-2.5 py-0.5 rounded-md text-sm font-medium ${
                         endpoint.method === 'POST' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
                       }`}>
                         {endpoint.method}
                       </span>
-                      <span className="font-mono text-lg">{endpoint.path}</span>
+                      <span className="font-mono text-base">{endpoint.path}</span>
                     </div>
                   </div>
-                  <div className="p-6">
-                    <p className="text-gray-700 mb-6">{endpoint.description}</p>
+                  <div className="p-4">
+                    <p className="text-gray-700 mb-4 text-sm">{endpoint.description}</p>
                     
-                    <div className="space-y-6">
+                    <div className="space-y-4">
                       <div>
                         <h4 className="font-semibold mb-3">Request</h4>
                         <div className="relative bg-gray-50 rounded-lg border p-4">
