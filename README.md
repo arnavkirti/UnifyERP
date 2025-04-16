@@ -82,3 +82,6 @@ Full API documentation is automatically generated in `docs/` based on mapping de
 - Endpoint specifications  
 - ERP-specific examples  
 - Version tracking  
+
+
+Thanks for reading!
