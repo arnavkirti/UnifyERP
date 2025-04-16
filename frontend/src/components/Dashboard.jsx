@@ -597,88 +597,91 @@ export default function Dashboard({ onLogout, user }) {
             </div>
           </div>
 
-          {/* Feature Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
-              <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center mb-4">
-                <Zap className="h-5 w-5 text-blue-600" />
-              </div>
-              <h3 className="text-slate-800 font-medium mb-2">Quick Actions</h3>
-              <p className="text-slate-500 text-sm mb-4">Access frequently used tools and actions in one place.</p>
-              <button className="text-blue-600 text-sm font-medium hover:text-blue-700">Get Started →</button>
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
-              <div className="w-10 h-10 rounded-md bg-green-100 flex items-center justify-center mb-4">
-                <Shield className="h-5 w-5 text-green-600" />
-              </div>
-              <h3 className="text-slate-800 font-medium mb-2">Security Center</h3>
-              <p className="text-slate-500 text-sm mb-4">Review and enhance your account security settings.</p>
-              <button className="text-green-600 text-sm font-medium hover:text-green-700">View Settings →</button>
-            </div>
-            
-            <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
-              <div className="w-10 h-10 rounded-md bg-purple-100 flex items-center justify-center mb-4">
-                <Activity className="h-5 w-5 text-purple-600" />
-              </div>
-              <h3 className="text-slate-800 font-medium mb-2">System Health</h3>
-              <p className="text-slate-500 text-sm mb-4">Monitor the performance and status of your ERP system.</p>
-              <button className="text-purple-600 text-sm font-medium hover:text-purple-700">Check Status →</button>
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          <div className="bg-white rounded-lg shadow-sm p-6 gap-5 border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-800">Recent Activity</h2>
-              {/* <button className="text-sm text-orange-600 font-medium hover:text-orange-700">View All</button> */}
-            </div>
-            <div className="space-y-4">
-              {[
-                {
-                  title: "New order received",
-                  amount: "$1,200.00",
-                  time: "2 hours ago",
-                  status: "success"
-                },
-                {
-                  title: "Payment processed",
-                  amount: "$850.00",
-                  time: "5 hours ago",
-                  status: "success"
-                },
-                {
-                  title: "Invoice declined",
-                  amount: "$320.00",
-                  time: "1 day ago",
-                  status: "error"
-                }
-              ].map((activity, index) => (
-                <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
-                  <div className="flex items-center gap-3">
-                    {activity.status === "success" ? (
-                      <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                        <ArrowUpRight className="h-4 w-4 text-green-600" />
-                      </div>
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
-                        <ArrowDownRight className="h-4 w-4 text-red-600" />
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-sm font-medium text-slate-900">{activity.title}</p>
-                      <p className="text-xs text-slate-500">{activity.time}</p>
-                    </div>
-                  </div>
-                  <span className={`text-sm font-medium ${
-                    activity.status === "success" ? "text-green-600" : "text-red-600"
-                  }`}>
-                    {activity.amount}
-                  </span>
+          {/* Feature Cards - Only show on Dashboard view */}
+          {activeItem === "Dashboard" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center mb-4">
+                  <Zap className="h-5 w-5 text-blue-600" />
                 </div>
-              ))}
+                <h3 className="text-slate-800 font-medium mb-2">Quick Actions</h3>
+                <p className="text-slate-500 text-sm mb-4">Access frequently used tools and actions in one place.</p>
+                <button className="text-blue-600 text-sm font-medium hover:text-blue-700">Get Started →</button>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 rounded-md bg-green-100 flex items-center justify-center mb-4">
+                  <Shield className="h-5 w-5 text-green-600" />
+                </div>
+                <h3 className="text-slate-800 font-medium mb-2">Security Center</h3>
+                <p className="text-slate-500 text-sm mb-4">Review and enhance your account security settings.</p>
+                <button className="text-green-600 text-sm font-medium hover:text-green-700">View Settings →</button>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm p-6 border border-slate-200 hover:shadow-md transition-shadow">
+                <div className="w-10 h-10 rounded-md bg-purple-100 flex items-center justify-center mb-4">
+                  <Activity className="h-5 w-5 text-purple-600" />
+                </div>
+                <h3 className="text-slate-800 font-medium mb-2">System Health</h3>
+                <p className="text-slate-500 text-sm mb-4">Monitor the performance and status of your ERP system.</p>
+                <button className="text-purple-600 text-sm font-medium hover:text-purple-700">Check Status →</button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Recent Activity - Only show on Dashboard view */}
+          {activeItem === "Dashboard" && (
+            <div className="bg-white rounded-lg shadow-sm p-6 gap-5 border border-slate-200">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-slate-800">Recent Activity</h2>
+              </div>
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "New order received",
+                    amount: "$1,200.00",
+                    time: "2 hours ago",
+                    status: "success"
+                  },
+                  {
+                    title: "Payment processed",
+                    amount: "$850.00",
+                    time: "5 hours ago",
+                    status: "success"
+                  },
+                  {
+                    title: "Invoice declined",
+                    amount: "$320.00",
+                    time: "1 day ago",
+                    status: "error"
+                  }
+                ].map((activity, index) => (
+                  <div key={index} className="flex items-center justify-between py-3 border-b last:border-0">
+                    <div className="flex items-center gap-3">
+                      {activity.status === "success" ? (
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                          <ArrowUpRight className="h-4 w-4 text-green-600" />
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center">
+                          <ArrowDownRight className="h-4 w-4 text-red-600" />
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">{activity.title}</p>
+                        <p className="text-xs text-slate-500">{activity.time}</p>
+                      </div>
+                    </div>
+                    <span className={`text-sm font-medium ${
+                      activity.status === "success" ? "text-green-600" : "text-red-600"
+                    }`}>
+                      {activity.amount}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
       {renderContent()}
         </div>
       </div>

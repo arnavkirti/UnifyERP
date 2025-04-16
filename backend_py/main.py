@@ -115,7 +115,7 @@ except Exception as e:
 # =========================== PROMPT + LLM ===========================
 template = """You are a smart data mapper.
 Given a JSON response from {source} system and the schema doc below,
-convert the input into the standard format. Respond with ONLY valid JSON, no explanations, markdown, or formatting and if the input data is less than show the section with null.
+convert the input into the standard format with proper mapping. Respond with ONLY valid JSON, no explanations, markdown, or formatting and if the input data is less than show the section with null.
 
 Schema Doc:
 {context}

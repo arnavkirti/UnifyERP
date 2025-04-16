@@ -1,34 +1,19 @@
-Universal Job Schema Documentation
-
-Field: job_id
-Description: A unique identifier for the job. In Oracle, it's `JobNumber`; in SAP, it's `jobName`.
-
-Field: job_title
-Description: Name or description of the job.
-
-Field: job_status
-Description: Status of the job. Can be `Scheduled`, `Running`, `Completed`, `Failed`.
-
-Field: created_by
-Description: The user or system that created the job.
-
-Field: created_at
-Description: Date and time when the job was created.
-
-Field: scheduled_time
-Description: When the job is scheduled to run.
-
-Field: last_run_time
-Description: Timestamp of the most recent run.
-
-Field: run_frequency
-Description: Frequency of job execution (e.g., daily, weekly).
-
-Field: run_parameters
-Description: Input parameters provided to the job.
-
-Field: output_location
-Description: Where the job output is stored.
-
-Field: system
-Description: ERP system the job originates from — e.g., SAP or Oracle.
+{
+  "job_id": "JOB-2025-001",
+  "job_number": "JN-0048",
+  "job_date": "2025-04-13",
+  "due_date": "2025-04-20",
+  "currency": "USD",
+  "vendor": "ABC Technologies",
+  "client": "XYZ Corp",
+  "items": [
+    {
+      "item_code": "SERV-101",
+      "description": "Cloud Setup Service",
+      "qty": 1,
+      "unit_price": 2000.00,
+      "total": 2000.00
+    }
+  ],
+  "job_total": 2000.00
+}

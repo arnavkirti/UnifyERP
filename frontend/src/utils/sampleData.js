@@ -33,42 +33,102 @@ export const sampleData = {
   },
   payment: {
     Oracle: {
-      paymentTermsId: "NET30",
-      description: "Net 30 days",
-      daysToPayment: 30,
-      discountPercent: 2,
-      discountDays: 10
+      "invoice_id": "ORA-45201",
+      "invoice_num": "ORA-INV-2025-09",
+      "invoice_date": "2025-03-28",
+      "payment_due_date": "2025-04-12",
+      "currency_code": "USD",
+      "supplier_name": "Oracle Cloud Services",
+      "customer_account_name": "Tesla Inc.",
+      "invoice_lines": [
+        {
+          "item_code": "ORC-PROD-991",
+          "description": "Cloud Server Hosting - March",
+          "quantity": 1,
+          "unit_price": 3000.00,
+          "amount": 3000.00
+        }
+      ],
+      "invoice_total": 3000.00
     },
     SAP: {
-      termCode: "N30",
-      termDescription: "Net 30",
-      paymentDueDays: 30,
-      earlyPaymentDiscount: 2,
-      discountValidDays: 10
+      "id": "INV1001",
+      "document_number": "SAP-INV-2024-001",
+      "posting_date": "2025-04-01",
+      "net_due_date": "2025-04-15",
+      "currency_code": "EUR",
+      "vendor": "Siemens AG",
+      "payer": "BMW Group",
+      "line_items": [
+        {
+          "material_number": "MAT100234",
+          "description": "Industrial Pump",
+          "quantity": 10,
+          "unit_price": 1200.00,
+          "net_amount": 12000.00
+        }
+      ],
+      "net_value": 12000.00
+    },
+    Microsoft_Dynamics:{
+      "invoice_number": "MDYN-3021",
+      "external_document_no": "MSFT-PO-7890",
+      "invoice_date": "2025-04-05",
+      "due_date": "2025-04-20",
+      "currency": "GBP",
+      "vendor_account": "Microsoft UK Ltd",
+      "customer_name": "Rolls Royce Plc",
+      "details": [
+        {
+          "product_id": "MSPROD-115",
+          "name": "Azure Credits",
+          "qty": 500,
+          "price_per_unit": 5.00,
+          "line_total": 2500.00
+        }
+      ],
+      "total_amount": 2500.00
     }
+    
   },
   job: {
-    Oracle: {
-      jobId: "JOB-001",
-      title: "Software Developer",
-      department: "Engineering",
-      salary: {
-        min: 80000,
-        max: 120000,
-        currency: "USD"
-      },
-      requirements: ["JavaScript", "React", "Node.js"]
-    },
     SAP: {
-      positionCode: "DEV-001",
-      positionTitle: "Software Engineer",
-      departmentCode: "ENG",
-      compensationRange: {
-        minimum: 80000,
-        maximum: 120000,
-        currencyCode: "USD"
-      },
-      skills: ["JavaScript", "React", "Node.js"]
+      "id": "SAP-STD-1020",
+      "document_number": "SAP-JOB-2025-01",
+      "posting_date": "2025-04-10",
+      "net_due_date": "2025-04-25",
+      "currency_code": "EUR",
+      "vendor": "Bosch GmbH",
+      "payer": "Volkswagen AG",
+      "line_items": [
+        {
+          "material_number": "ENG-SRV-502",
+          "description": "Engineering Consulting",
+          "quantity": 1,
+          "unit_price": 5000.00,
+          "net_amount": 5000.00
+        }
+      ],
+      "net_value": 5000.00
+    },
+    Oracle: {
+      "invoice_id": "ORA-JOB-3321",
+      "invoice_num": "ORA-STDJOB-008",
+      "invoice_date": "2025-03-30",
+      "payment_due_date": "2025-04-14",
+      "currency_code": "USD",
+      "supplier_name": "Infosys Ltd",
+      "customer_account_name": "Caterpillar Inc.",
+      "invoice_lines": [
+        {
+          "item_code": "CONS-1001",
+          "description": "IT Support Services",
+          "quantity": 3,
+          "unit_price": 1200.00,
+          "amount": 3600.00
+        }
+      ],
+      "invoice_total": 3600.00
     }
   },
   schema: {
@@ -79,7 +139,9 @@ export const sampleData = {
       {
         productName: "string",
         quantity: "integer",
-        price: "number"
+        price: "number",
+        discount: "number",
+        tax: "number"
       }
     ]
   },
