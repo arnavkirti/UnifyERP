@@ -67,7 +67,8 @@ To address major industry challenges in ERP integration, the solution incorporat
 - Node.js / Python  
 - JSON Schema  
 - Express.js (for API framework)  
-- JWT & AES Encryption  
+- OAuth2.0 for authentication and security
+- Load balancing and connection pooling
 - Shell scripting (for automation & updates)  
 - ML/AI (for predictive features)  
 
