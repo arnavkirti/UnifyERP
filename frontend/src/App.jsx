@@ -79,7 +79,7 @@ function App() {
       <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
         <div className="w-full max-w-[1920px] mx-auto flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-2">
-            <img src="src/assets/logo.png" alt="ICICI Bank Logo" className="h-16 w-auto" />
+            <img src="/logo.png" alt="ICICI Bank Logo" className="h-16 w-auto" />
           </div>
           <nav className="hidden md:flex gap-6">
             <a href="#features" className="text-sm font-medium text-gray-700 hover:text-orange-600 transition-colors">
@@ -133,7 +133,7 @@ function App() {
               </div>
               <div className="hidden lg:block">
                 <img 
-                  src="src/assets/dashboard.png" 
+                  src="/dashboard.png" 
                   alt="Dashboard Preview" 
                   className="rounded-lg shadow-xl"
                 />
@@ -201,27 +201,27 @@ function App() {
                 {
                   name: "Arnav Kirti",
                   role: "Team Lead",
-                  image: "src/assets/mem-1.png"
+                  image: "/mem-1.png"
                 },
                 {
                   name: "Harshit Kumar",
                   role: "Frontend Developer",
-                  image: "src/assets/mem-2.png"
+                  image: "/mem-2.png"
                 },
                 {
                   name: "Nitin Nigam",
                   role: "Backend Developer",
-                  image: "src/assets/mem-2.png"
+                  image: "/mem-2.png"
                 },
                 {
                   name: "Ishit Kalra",
                   role: "UI/UX Designer",
-                  image: "src/assets/mem-2.png"
+                  image: "/mem-2.png"
                 },
                 {
                   name: "Aviral Singh",
                   role: "DevOps Engineer",
-                  image: "src/assets/mem-2.png"
+                  image: "/mem-2.png"
                 }
               ].map((member, index) => (
                 <div key={index} className="text-center">
