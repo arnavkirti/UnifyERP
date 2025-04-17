@@ -26,7 +26,7 @@ const scopes = [
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://unify-erp.vercel.app/'],
+  origin: ['http://localhost:5173', 'https://unify-erp.vercel.app'],
   credentials: true
 }));
 
@@ -64,10 +64,15 @@ app.get('/auth/oauth2/callback', async (req, res) => {
   const { state, code, error } = req.query;
 
   if (error) {
+    console.error('OAuth error:', error);
     return res.redirect('https://unify-erp.vercel.app/login?error=' + error);
   }
 
-  if (state !== req.session.state) {
+  if (!state || !req.session.state || state !== req.session.state) {
+    console.error('State mismatch:', { 
+      receivedState: state, 
+      sessionState: req.session.state 
+    });
     return res.redirect('https://unify-erp.vercel.app/login?error=invalid_state');
   }
 
