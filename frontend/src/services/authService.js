@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = 'https://unifyerp-nodebackend.onrender.com';
 
 export const authService = {
   login: () => {
@@ -12,7 +12,12 @@ export const authService = {
   isAuthenticated: async () => {
     try {
       const response = await fetch(`${API_URL}/auth/status`, {
-        credentials: 'include'
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        mode: 'cors'
       });
       const data = await response.json();
       return data.authenticated;

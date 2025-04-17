@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'https://unifyerpbackend-py.onrender.com';
 
 export const apiService = {
   // Check API compatibility between ERP schemas

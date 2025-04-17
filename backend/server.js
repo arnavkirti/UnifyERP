@@ -26,7 +26,7 @@ const scopes = [
 
 // CORS configuration
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'https://unify-erp.vercel.app/'],
   credentials: true
 }));
 
