@@ -68,13 +68,13 @@ app.get('/auth/oauth2/callback', async (req, res) => {
     return res.redirect('https://unify-erp.vercel.app/login?error=' + error);
   }
 
-  if (!state || !req.session.state || state !== req.session.state) {
-    console.error('State mismatch:', { 
-      receivedState: state, 
-      sessionState: req.session.state 
-    });
-    return res.redirect('https://unify-erp.vercel.app/login?error=invalid_state');
-  }
+  // if (!state || !req.session.state || state !== req.session.state) {
+  //   console.error('State mismatch:', { 
+  //     receivedState: state, 
+  //     sessionState: req.session.state 
+  //   });
+  //   return res.redirect('https://unify-erp.vercel.app/login?error=invalid_state');
+  // }
 
   try {
     const { tokens } = await oauth2Client.getToken(code);
