@@ -64,11 +64,11 @@ app.get('/auth/oauth2/callback', async (req, res) => {
   const { state, code, error } = req.query;
 
   if (error) {
-    return res.redirect('http://localhost:5173/login?error=' + error);
+    return res.redirect('https://unify-erp.vercel.app/login?error=' + error);
   }
 
   if (state !== req.session.state) {
-    return res.redirect('http://localhost:5173/login?error=invalid_state');
+    return res.redirect('https://unify-erp.vercel.app/login?error=invalid_state');
   }
 
   try {
@@ -88,10 +88,10 @@ app.get('/auth/oauth2/callback', async (req, res) => {
       tokens
     };
 
-    res.redirect('http://localhost:5173/dashboard');
+    res.redirect('https://unify-erp.vercel.app/dashboard');
   } catch (error) {
     console.error('OAuth error:', error);
-    res.redirect('http://localhost:5173/login?error=auth_error');
+    res.redirect('https://unify-erp.vercel.app/login?error=auth_error');
   }
 });
 
